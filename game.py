@@ -1,6 +1,7 @@
 import arcade
 import os
 import math
+from card import Card
 
 SPRITE_SCALING = 0.5
 
@@ -9,29 +10,6 @@ SCREEN_HEIGHT = 600
 SCREEN_TITLE = "Silly Cow"
 
 ANGLE = 120
-
-
-class Card(arcade.Sprite):
-    """ Card class """
-
-    def __init__(self, image, scale):
-        """ Set up the Card """
-
-        # Call the parent init
-        super().__init__(image, scale)
-
-        # Create a variable to hold our speed. 'angle' is created by the parent
-        self.speed = 0
-
-    def update(self):
-        # Rotate the ship
-        self.angle += self.change_angle
-
-    def set_pos(self, x, y):
-        # print(self.center_x, self.center_y)
-        self.center_y = (SCREEN_HEIGHT / 2)
-        self.center_x = x
-
 
 class MyGame(arcade.Window):
     """
@@ -87,7 +65,6 @@ class MyGame(arcade.Window):
 
     def setup_cow(self):
         """ Set up the game and initialize the variables. """
-
         self.cow_list_center = arcade.SpriteList()
         self.cow_center = Card("card/cow_center.png", SPRITE_SCALING)
         self.cow_center.center_x = (SCREEN_WIDTH / 2)-150
@@ -243,7 +220,7 @@ class MyGame(arcade.Window):
             self.card_select = None
         elif key == arcade.key.LEFT and self.card_select == "S" and self.sheep_position != 0:
             self.sheep.change_angle = ANGLE
-            self.sheep.update()
+            self.sheep.update(ANGLE)
             self.card_select = None
         elif key == arcade.key.RIGHT and self.card_select == "S" and self.sheep_position == 0:
             self.sheep_center.remove_from_sprite_lists()
