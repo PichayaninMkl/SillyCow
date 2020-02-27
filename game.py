@@ -10,6 +10,7 @@ SCREEN_TITLE = "Silly Cow"
 
 ANGLE = 120
 
+
 class Card(arcade.Sprite):
     """ Card class """
 
@@ -26,11 +27,11 @@ class Card(arcade.Sprite):
         # Rotate the ship
         self.angle += self.change_angle
 
-    def set_pos(self):
+    def set_pos(self, x, y):
         # print(self.center_x, self.center_y)
-        self.center_y = SCREEN_HEIGHT / 2
-        self.center_x = SCREEN_WIDTH / 2
-        
+        self.center_y = (SCREEN_HEIGHT / 2)
+        self.center_x = x
+
 
 class MyGame(arcade.Window):
     """
@@ -72,7 +73,7 @@ class MyGame(arcade.Window):
         self.pig = None
         self.sheep = None
 
-        # set position all card 
+        # set position all card
         self.cow_position = 0
         self.horse_position = 0
         self.pig_position = 0
@@ -95,8 +96,8 @@ class MyGame(arcade.Window):
 
         # self.cow_list = arcade.SpriteList()
         self.cow = Card("card/cow.png", SPRITE_SCALING)
-        self.cow.center_x = SCREEN_WIDTH / 2
-        self.cow.center_y = (SCREEN_HEIGHT / 2)+400
+        self.cow.center_x = SCREEN_WIDTH * 0.45
+        # self.cow.center_y = (SCREEN_HEIGHT / 2)+400
         # self.cow_list.append(self.cow)
 
     def setup_horse(self):
@@ -108,8 +109,8 @@ class MyGame(arcade.Window):
 
         # self.horse_list = arcade.SpriteList()
         self.horse = Card("card/horse.png", SPRITE_SCALING)
-        self.horse.center_x = SCREEN_WIDTH / 2
-        self.horse.center_y = (SCREEN_HEIGHT / 2)+400
+        self.horse.center_x = SCREEN_WIDTH * 0.5
+        # self.horse.center_y = (SCREEN_HEIGHT / 2)+400
         # self.horse_list.append(self.horse)
 
     def setup_pig(self):
@@ -121,8 +122,8 @@ class MyGame(arcade.Window):
 
         # self.pig_list = arcade.SpriteList()
         self.pig = Card("card/pig.png", SPRITE_SCALING)
-        self.pig.center_x = SCREEN_WIDTH / 2
-        self.pig.center_y = (SCREEN_HEIGHT / 2)+400
+        self.pig.center_x = SCREEN_WIDTH * 0.55
+        # self.pig.center_y = (SCREEN_HEIGHT / 2)+400
         # self.pig_list.append(self.pig)
 
     def setup_sheep(self):
@@ -134,8 +135,8 @@ class MyGame(arcade.Window):
 
         # self.sheep_list = arcade.SpriteList()
         self.sheep = Card("card/sheep.png", SPRITE_SCALING)
-        self.sheep.center_x = SCREEN_WIDTH / 2
-        self.sheep.center_y = (SCREEN_HEIGHT / 2)+400
+        self.sheep.center_x = SCREEN_WIDTH * 0.6
+        # self.sheep.center_y = (SCREEN_HEIGHT / 2)+400
         # self.sheep_list.append(self.sheep)
 
     def on_draw(self):
@@ -178,12 +179,12 @@ class MyGame(arcade.Window):
         elif key == arcade.key.P:
             # print(self.card_select)
             self.card_select = "P"
-        elif key == arcade.key.S:   
-            # print(self.card_select) 
+        elif key == arcade.key.S:
+            # print(self.card_select)
             self.card_select = "S"
         elif key == arcade.key.LEFT and self.card_select == "C" and self.cow_position == 0:
             self.cow_center.remove_from_sprite_lists()
-            self.cow.set_pos()
+            self.cow.set_pos(self.cow.center_x, self.cow.center_y)
             self.cow_position = 1
             self.card_select = None
         elif key == arcade.key.LEFT and self.card_select == "C" and self.cow_position != 0:
@@ -192,7 +193,7 @@ class MyGame(arcade.Window):
             self.card_select = None
         elif key == arcade.key.RIGHT and self.card_select == "C" and self.cow_position == 0:
             self.cow_center.remove_from_sprite_lists()
-            self.cow.set_pos()
+            self.cow.set_pos(self.cow.center_x, self.cow.center_y)
             self.cow_position = 1
             self.card_select = None
         elif key == arcade.key.RIGHT and self.card_select == "C" and self.cow_position != 0:
@@ -201,7 +202,7 @@ class MyGame(arcade.Window):
             self.card_select = None
         elif key == arcade.key.LEFT and self.card_select == "H" and self.horse_position == 0:
             self.horse_center.remove_from_sprite_lists()
-            self.horse.set_pos()
+            self.horse.set_pos(self.horse.center_x, self.horse.center_y)
             self.horse_position = 1
             self.card_select = None
         elif key == arcade.key.LEFT and self.card_select == "H" and self.horse_position != 0:
@@ -210,7 +211,7 @@ class MyGame(arcade.Window):
             self.card_select = None
         elif key == arcade.key.RIGHT and self.card_select == "H" and self.horse_position == 0:
             self.horse_center.remove_from_sprite_lists()
-            self.horse.set_pos()
+            self.horse.set_pos(self.horse.center_x, self.horse.center_y)
             self.horse_position = 1
             self.card_select = None
         elif key == arcade.key.RIGHT and self.card_select == "H" and self.horse_position != 0:
@@ -219,7 +220,7 @@ class MyGame(arcade.Window):
             self.card_select = None
         elif key == arcade.key.LEFT and self.card_select == "P" and self.pig_position == 0:
             self.pig_center.remove_from_sprite_lists()
-            self.pig.set_pos()
+            self.pig.set_pos(self.pig.center_x, self.pig.center_y)
             self.pig_position = 1
             self.card_select = None
         elif key == arcade.key.LEFT and self.card_select == "P" and self.pig_position != 0:
@@ -228,7 +229,7 @@ class MyGame(arcade.Window):
             self.card_select = None
         elif key == arcade.key.RIGHT and self.card_select == "P" and self.pig_position == 0:
             self.pig_center.remove_from_sprite_lists()
-            self.pig.set_pos()
+            self.pig.set_pos(self.pig.center_x, self.pig.center_y)
             self.pig_position = 1
             self.card_select = None
         elif key == arcade.key.RIGHT and self.card_select == "P" and self.pig_position != 0:
@@ -237,7 +238,7 @@ class MyGame(arcade.Window):
             self.card_select = None
         elif key == arcade.key.LEFT and self.card_select == "S" and self.sheep_position == 0:
             self.sheep_center.remove_from_sprite_lists()
-            self.sheep.set_pos()
+            self.sheep.set_pos(self.sheep.center_x, self.sheep.center_y)
             self.sheep_position = 1
             self.card_select = None
         elif key == arcade.key.LEFT and self.card_select == "S" and self.sheep_position != 0:
@@ -246,7 +247,7 @@ class MyGame(arcade.Window):
             self.card_select = None
         elif key == arcade.key.RIGHT and self.card_select == "S" and self.sheep_position == 0:
             self.sheep_center.remove_from_sprite_lists()
-            self.sheep.set_pos()
+            self.sheep.set_pos(self.sheep.center_x, self.sheep.center_y)
             self.sheep_position = 1
             self.card_select = None
         elif key == arcade.key.RIGHT and self.card_select == "S" and self.sheep_position != 0:
