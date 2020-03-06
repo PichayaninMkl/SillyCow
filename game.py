@@ -14,9 +14,11 @@ SCREEN_TITLE = "Silly Cow"
 ANGLE = 120
 test = 0
 HAND = [2,3,3,1]
+HAND1 = [3,2,3,1]
+HAND2 = [2,3,2,2]
 USED_DECK = []
-DECK = []
-COMMAND = [["H",2,False,False,1],[None,0,False,True,1]]
+DECK = ["C","H","P","S","C","H","P","S"]
+COMMAND = [["H",2,False,False,1],[None,0,False,True,1],[None,0,True,False,1],[None,0,True,False,1],[None,0,True,False,1],[None,0,True,False,1]]
 class MyGame(arcade.Window):
     """
     Main application class.
@@ -40,6 +42,8 @@ class MyGame(arcade.Window):
         # Variables that will hold sprite lists
         self.card_list = arcade.SpriteList()
         self.hand_list = arcade.SpriteList()
+        self.hand_list1 = arcade.SpriteList()
+        self.hand_list2 = arcade.SpriteList()
         self.top_used_card_list = arcade.SpriteList()
         self.deck_list = arcade.SpriteList()
         # Set up the Card info
@@ -52,6 +56,8 @@ class MyGame(arcade.Window):
         self.pig = None
         self.sheep = None
         self.temp_hand_card = []
+        self.temp_hand_card1 = []
+        self.temp_hand_card2 = []
         self.button = None
         self.deck = None
         self.top_used_card = None
@@ -113,8 +119,35 @@ class MyGame(arcade.Window):
                 self.hand_list.append(self.temp_hand_card[j])
                 j = j+1
         j = 0
-        print("card in hand :",len(self.hand_list))
+        # print("card in hand :",len(self.hand_list))
 
+    def setup_hand1(self,hand):
+        list_name = ["C","H","P","S"]
+        j = 0
+        for i in range(4):
+            for card_number in range(hand[i]):
+                self.temp_hand_card1.append(None)
+                self.temp_hand_card1[j] = Card(self.animal_picture_center[list_name[i]],SPRITE_SCALING)
+                self.temp_hand_card1[j].center_x = 300  
+                self.temp_hand_card1[j].center_y = 300 + (j*60)
+                self.hand_list1.append(self.temp_hand_card1[j])
+                j = j+1
+        j = 0
+        # print("card in hand1 :",len(self.hand_list))
+
+    def setup_hand2(self,hand):
+        list_name = ["C","H","P","S"]
+        j = 0
+        for i in range(4):
+            for card_number in range(hand[i]):
+                self.temp_hand_card2.append(None)
+                self.temp_hand_card2[j] = Card(self.animal_picture_center[list_name[i]],SPRITE_SCALING)
+                self.temp_hand_card2[j].center_x = 1300  
+                self.temp_hand_card2[j].center_y = 300 + (j*60)
+                self.hand_list2.append(self.temp_hand_card2[j])
+                j = j+1
+        j = 0
+        # print("card in hand2 :",len(self.hand_list))
 
     def clear_hand(self):
         for i in range(len(self.hand_list)):
@@ -136,8 +169,8 @@ class MyGame(arcade.Window):
             counter = counter + 2
 
     def setup_deck(self):
-        self.deck = Card(self.animal_picture_center["C"],SPRITE_SCALING)
-        self.deck.center_x = 200
+        self.deck = Card(self.animal_picture_center[DECK[-1]],SPRITE_SCALING)
+        self.deck.center_x = 400
         self.deck.center_y = (SCREEN_HEIGHT/2)
         self.deck_list.append(self.deck)
 
@@ -146,7 +179,7 @@ class MyGame(arcade.Window):
         if len(USED_DECK)>=1:
             print("have use card:",USED_DECK[-1])
             self.top_used_card = Card(self.animal_picture_center[USED_DECK[-1]],SPRITE_SCALING)
-            self.top_used_card.center_x = 1400
+            self.top_used_card.center_x = 1200
             self.top_used_card.center_y = (SCREEN_HEIGHT/2)
             self.top_used_card_list.append(self.top_used_card) 
         else:
@@ -167,6 +200,9 @@ class MyGame(arcade.Window):
         # Draw all card at center.
         self.card_list.draw()
         self.hand_list.draw()
+        self.hand_list1.draw()
+        self.hand_list2.draw()
+
         self.deck_list.draw()
         self.top_used_card_list.draw()
         list_name = ["C","H","P","S"]
@@ -208,6 +244,18 @@ class MyGame(arcade.Window):
             self.clear_hand()
             self.setup_hand(HAND)
             self.hand_list.draw()
+            self.setup_used_deck()
+            self.top_used_card_list.draw()
+            USED_DECK.pop()
+        elif draw_blind == True and len(DECK)>=1:
+            # Draw used card
+            HAND[mapper.index(DECK[-1])] += 1
+            self.clear_hand()
+            self.setup_hand(HAND)
+            self.hand_list.draw()   
+            self.setup_deck()
+            self.deck_list.draw()
+            DECK.pop()
         elif HAND[mapper.index(card)]<amount:
             # Check if card(s) in hand is suffiecient to play
             print("cannot play.Not enough card")
@@ -248,6 +296,9 @@ def main():
     window.setup_used_deck()
     window.setup_deck()
     window.setup_hand(HAND)
+    window.setup_hand1(HAND1)
+    window.setup_hand2(HAND2)
+
     window.setup_all_animal()
     arcade.run()
 
