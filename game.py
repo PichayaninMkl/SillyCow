@@ -2,7 +2,7 @@ import arcade
 import os
 import math
 from card import Card
-# from button import PlayButton
+
 SPRITE_SCALING = 0.5
 
 SCREEN_WIDTH = 1600
@@ -33,7 +33,7 @@ class MyGame(arcade.Window):
 
         # Variables that will hold sprite lists
         self.card_list = arcade.SpriteList()
-
+        self.hand_list = arcade.SpriteList()
         # Set up the Card info
         self.cow_center = None
         self.horse_center = None
@@ -43,7 +43,8 @@ class MyGame(arcade.Window):
         self.horse = None
         self.pig = None
         self.sheep = None
-
+        self.hand = ["2","3","3","1"]
+        self.temp_hand_card = []
         self.button = None
 
         # set position all card
@@ -89,9 +90,25 @@ class MyGame(arcade.Window):
         arcade.set_background_color(arcade.color.AMAZON)
 
     def set_buttons(self):
-        button_temp = arcade.TextButton(100,100,150,50,"Play",font_size=24,font_color=arcade.color.BLACK)
+        button_temp = arcade.TextButton(100,100,150,50,"Play",font_size=24)
         self.button = arcade.SubmitButton(button_temp,self.on_submit,100,100,text="Play")
-        # self.button_list.append(self.button)
+
+    def setup_hand(self,hand):
+        list_name = ["C","H","P","S"]
+        j = 0
+        for i in range(4):
+            for card_number in range(hand[i]):
+                self.temp_hand_card.append(None)
+                self.temp_hand_card[j] = Card(self.animal_picture_center[list_name[i]],SPRITE_SCALING)
+                self.temp_hand_card[j].center_x = 300  + (j*60)
+                self.temp_hand_card[j].center_y = 100
+                self.hand_list.append(self.temp_hand_card[j])
+                print()
+                j = j+1
+                
+        j = 0
+        print(len(self.temp_hand_card))
+
 
     def setup_all_animal(self):
         counter = -3
@@ -117,9 +134,12 @@ class MyGame(arcade.Window):
 
         # Draw all card at center.
         self.card_list.draw()
+        self.hand_list.draw()
         list_name = ["C","H","P","S"]
         for name in list_name:
             self.animal_all_dict[name].draw()
+        # for i in range(9):
+        #     self.temp_hand_card[i].draw()
         self.button.draw()
 
 
@@ -170,6 +190,7 @@ def main():
     """ Main method """
     window = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
     window.set_buttons()
+    window.setup_hand([2,3,3,1])
     window.setup_all_animal()
     arcade.run()
 
