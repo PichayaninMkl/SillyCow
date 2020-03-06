@@ -11,6 +11,8 @@ SCREEN_TITLE = "Silly Cow"
 
 ANGLE = 120
 test = 0
+HAND = [2,3,3,1]
+
 class MyGame(arcade.Window):
     """
     Main application class.
@@ -43,7 +45,6 @@ class MyGame(arcade.Window):
         self.horse = None
         self.pig = None
         self.sheep = None
-        self.hand = ["2","3","3","1"]
         self.temp_hand_card = []
         self.button = None
 
@@ -103,12 +104,16 @@ class MyGame(arcade.Window):
                 self.temp_hand_card[j].center_x = 300  + (j*60)
                 self.temp_hand_card[j].center_y = 100
                 self.hand_list.append(self.temp_hand_card[j])
-                print()
                 j = j+1
-                
         j = 0
         print(len(self.temp_hand_card))
 
+    def clear_hand(self):
+        print(len(self.hand_list))
+        for i in range(len(self.hand_list)):
+            self.hand_list.remove(self.temp_hand_card[i])
+        print(len(self.hand_list))
+        
 
     def setup_all_animal(self):
         counter = -3
@@ -138,8 +143,6 @@ class MyGame(arcade.Window):
         list_name = ["C","H","P","S"]
         for name in list_name:
             self.animal_all_dict[name].draw()
-        # for i in range(9):
-        #     self.temp_hand_card[i].draw()
         self.button.draw()
 
 
@@ -158,23 +161,26 @@ class MyGame(arcade.Window):
         self.button.check_mouse_release(x,y)
 
     def on_submit(self):
-        self.playing("C",2,False,False,1)
+        self.playing("H",2,False,False,1)
 
 
     def playing(self, card, amount,draw_blind,draw,player):
-        
+        mapper = ["C","H","P","S"]
         """Called whenever a key is pressed. """
         print(amount,card,player,self.animal_position_dict[card])
-        if amount == 2 and self.animal_position_dict[card] == 0:
-            print("init i sus")
+        if HAND[mapper.index(card)]<amount:
+            print("cannot play.Not enough card")
+        elif amount == 2 and self.animal_position_dict[card] == 0:
             self.center_all_dict[card].remove_from_sprite_lists()
             self.animal_all_dict[card].set_pos(self.animal_all_dict[card].center_x, self.animal_all_dict[card].center_y)
             self.animal_all_dict[card].change_angle = -(ANGLE * player)
             self.animal_all_dict[card].update()                
             self.animal_position_dict[card] = 1
-            print("init",self.animal_position_dict[card])
+            HAND[mapper.index(card)] -= amount
+            self.clear_hand()
+            self.setup_hand(HAND)
+            self.hand_list.draw()
         elif amount == 2 and self.animal_position_dict[card] == 1:
-            print("go on i sus")
             self.animal_all_dict[card].change_angle = -ANGLE
             self.animal_all_dict[card].update()
             print("go on")
@@ -190,7 +196,7 @@ def main():
     """ Main method """
     window = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
     window.set_buttons()
-    window.setup_hand([2,3,3,1])
+    window.setup_hand(HAND)
     window.setup_all_animal()
     arcade.run()
 
