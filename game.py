@@ -2,7 +2,7 @@ import arcade
 import os
 import math
 from card import Card
-
+# from button import PlayButton
 SPRITE_SCALING = 0.5
 
 SCREEN_WIDTH = 1600
@@ -10,7 +10,7 @@ SCREEN_HEIGHT = 900
 SCREEN_TITLE = "Silly Cow"
 
 ANGLE = 120
-
+test = 0
 class MyGame(arcade.Window):
     """
     Main application class.
@@ -44,55 +44,68 @@ class MyGame(arcade.Window):
         self.pig = None
         self.sheep = None
 
+        self.button = None
+
         # set position all card
         self.cow_position = 0
         self.horse_position = 0
         self.pig_position = 0
         self.sheep_position = 0
-        self.bot_button_position = 0
 
-        # card select
-        self.card_select = None
+
+        # for easy access, use dictionary
+        self.center_all_dict = {
+            "C": self.cow_center,
+            "H": self.horse_center,
+            "P": self.pig_center,
+            "S": self.sheep_center
+        }
+        self.animal_all_dict = {
+            "C": self.cow,
+            "H": self.horse,
+            "P": self.pig,
+            "S": self.sheep
+        }
+        self.animal_position_dict = {
+            "C": self.cow_position,
+            "H": self.horse_position,
+            "P": self.pig_position,
+            "S": self.sheep_position
+        }
+        self.animal_picture_center = {
+            "C": "card/cow_center.png",
+            "H": "card/horse_center.png",
+            "P": "card/pig_center.png",
+            "S": "card/sheep_center.png"
+        }
+        self.animal_picture_rotate = {
+            "C": "card/cow.png",
+            "H": "card/horse.png",
+            "P": "card/pig.png",
+            "S": "card/sheep.png"
+        }
 
         # Set the background color
-        arcade.set_background_color(arcade.color.BLACK)
+        arcade.set_background_color(arcade.color.AMAZON)
 
-    def setup_cow(self):
-        """ Set up the game and initialize the variables. """
-        self.cow_center = Card("card/cow_center.png", SPRITE_SCALING)
-        self.cow_center.center_x = (SCREEN_WIDTH / 2)-150
-        self.cow_center.center_y = SCREEN_HEIGHT / 2
-        self.card_list.append(self.cow_center)
+    def set_buttons(self):
+        button_temp = arcade.TextButton(100,100,150,50,"Play",font_size=24,font_color=arcade.color.BLACK)
+        self.button = arcade.SubmitButton(button_temp,self.on_submit,100,100,text="Play")
+        # self.button_list.append(self.button)
 
-        self.cow = Card("card/cow.png", SPRITE_SCALING)
-        self.cow.center_x = SCREEN_WIDTH * 0.45
+    def setup_all_animal(self):
+        counter = -3
+        list_name = ["C","H","P","S"]
+        for name in list_name:
+            self.center_all_dict[name] = Card(self.animal_picture_center[name],SPRITE_SCALING)
+            self.center_all_dict[name].center_x = (SCREEN_WIDTH/2) + (counter*50)
+            self.center_all_dict[name].center_y = (SCREEN_HEIGHT/2)
+            self.card_list.append(self.center_all_dict[name])
 
-    def setup_horse(self):
-        self.horse_center = Card("card/horse_center.png", SPRITE_SCALING)
-        self.horse_center.center_x = (SCREEN_WIDTH / 2)-50
-        self.horse_center.center_y = SCREEN_HEIGHT / 2
-        self.card_list.append(self.horse_center)
-
-        self.horse = Card("card/horse.png", SPRITE_SCALING)
-        self.horse.center_x = SCREEN_WIDTH * 0.5
-
-    def setup_pig(self):
-        self.pig_center = Card("card/pig_center.png", SPRITE_SCALING)
-        self.pig_center.center_x = (SCREEN_WIDTH / 2)+50
-        self.pig_center.center_y = SCREEN_HEIGHT / 2
-        self.card_list.append(self.pig_center)
-
-        self.pig = Card("card/pig.png", SPRITE_SCALING)
-        self.pig.center_x = SCREEN_WIDTH * 0.55
-
-    def setup_sheep(self):
-        self.sheep_center = Card("card/sheep_center.png", SPRITE_SCALING)
-        self.sheep_center.center_x = (SCREEN_WIDTH / 2)+150
-        self.sheep_center.center_y = SCREEN_HEIGHT / 2
-        self.card_list.append(self.sheep_center)
-
-        self.sheep = Card("card/sheep.png", SPRITE_SCALING)
-        self.sheep.center_x = SCREEN_WIDTH * 0.6
+            self.animal_all_dict[name] = Card(self.animal_picture_rotate[name],SPRITE_SCALING)
+            self.animal_all_dict[name].center_x = SCREEN_WIDTH * (0.4+(0.05*(counter+4)))
+            # print(name," position: ",self.animal_all_dict[name].)
+            counter = counter + 2
 
     def on_draw(self):
         """
@@ -104,12 +117,11 @@ class MyGame(arcade.Window):
 
         # Draw all card at center.
         self.card_list.draw()
-        self.cow.draw()
-        self.horse.draw()
-        self.pig.draw()
-        self.sheep.draw()
-        # arcade.draw_text("Start bot",
-        #                  (SCREEN_WIDTH / 7),(SCREEN_HEIGHT / 7), arcade.color.WHITE, 24, anchor_x="left", anchor_y="top")
+        list_name = ["C","H","P","S"]
+        for name in list_name:
+            self.animal_all_dict[name].draw()
+        self.button.draw()
+
 
     def on_update(self, delta_time):
         """ Movement and game logic """
@@ -119,110 +131,46 @@ class MyGame(arcade.Window):
         # self.cow_list.update()
         pass
 
-    # def on_mouse_press(self,)    
-         
-    def on_key_press(self, key, modifiers):
-        """Called whenever a key is pressed. """
+    def on_mouse_press(self,x,y,buttons,modifiers):
+        self.button.check_mouse_press(x,y)
 
-        # Rotate left/right
-        if key == arcade.key.C:
-            # print(self.card_select)
-            # print(self.cow_position)
-            self.card_select = "C"
-        elif key == arcade.key.H:
-            # print(self.card_select)
-            self.card_select = "H"
-        elif key == arcade.key.P:
-            # print(self.card_select)
-            self.card_select = "P"
-        elif key == arcade.key.S:
-            # print(self.card_select)
-            self.card_select = "S"
-        elif key == arcade.key.LEFT and self.card_select == "C" and self.cow_position == 0:
-            self.cow_center.remove_from_sprite_lists()
-            self.cow.set_pos(self.cow.center_x, self.cow.center_y)
-            self.cow_position = 1
-            self.card_select = None
-        elif key == arcade.key.LEFT and self.card_select == "C" and self.cow_position != 0:
-            self.cow.change_angle = ANGLE
-            self.cow.update()
-            self.card_select = None
-        elif key == arcade.key.RIGHT and self.card_select == "C" and self.cow_position == 0:
-            self.cow_center.remove_from_sprite_lists()
-            self.cow.set_pos(self.cow.center_x, self.cow.center_y)
-            self.cow_position = 1
-            self.card_select = None
-        elif key == arcade.key.RIGHT and self.card_select == "C" and self.cow_position != 0:
-            self.cow.change_angle = -ANGLE
-            self.cow.update()
-            self.card_select = None
-        elif key == arcade.key.LEFT and self.card_select == "H" and self.horse_position == 0:
-            self.horse_center.remove_from_sprite_lists()
-            self.horse.set_pos(self.horse.center_x, self.horse.center_y)
-            self.horse_position = 1
-            self.card_select = None
-        elif key == arcade.key.LEFT and self.card_select == "H" and self.horse_position != 0:
-            self.horse.change_angle = ANGLE
-            self.horse.update()
-            self.card_select = None
-        elif key == arcade.key.RIGHT and self.card_select == "H" and self.horse_position == 0:
-            self.horse_center.remove_from_sprite_lists()
-            self.horse.set_pos(self.horse.center_x, self.horse.center_y)
-            self.horse_position = 1
-            self.card_select = None
-        elif key == arcade.key.RIGHT and self.card_select == "H" and self.horse_position != 0:
-            self.horse.change_angle = -ANGLE
-            self.horse.update()
-            self.card_select = None
-        elif key == arcade.key.LEFT and self.card_select == "P" and self.pig_position == 0:
-            self.pig_center.remove_from_sprite_lists()
-            self.pig.set_pos(self.pig.center_x, self.pig.center_y)
-            self.pig_position = 1
-            self.card_select = None
-        elif key == arcade.key.LEFT and self.card_select == "P" and self.pig_position != 0:
-            self.pig.change_angle = ANGLE
-            self.pig.update()
-            self.card_select = None
-        elif key == arcade.key.RIGHT and self.card_select == "P" and self.pig_position == 0:
-            self.pig_center.remove_from_sprite_lists()
-            self.pig.set_pos(self.pig.center_x, self.pig.center_y)
-            self.pig_position = 1
-            self.card_select = None
-        elif key == arcade.key.RIGHT and self.card_select == "P" and self.pig_position != 0:
-            self.pig.change_angle = -ANGLE
-            self.pig.update()
-            self.card_select = None
-        elif key == arcade.key.LEFT and self.card_select == "S" and self.sheep_position == 0:
-            self.sheep_center.remove_from_sprite_lists()
-            self.sheep.set_pos(self.sheep.center_x, self.sheep.center_y)
-            self.sheep_position = 1
-            self.card_select = None
-        elif key == arcade.key.LEFT and self.card_select == "S" and self.sheep_position != 0:
-            self.sheep.change_angle = ANGLE
-            self.sheep.update()
-            self.card_select = None
-        elif key == arcade.key.RIGHT and self.card_select == "S" and self.sheep_position == 0:
-            self.sheep_center.remove_from_sprite_lists()
-            self.sheep.set_pos(self.sheep.center_x, self.sheep.center_y)
-            self.sheep_position = 1
-            self.card_select = None
-        elif key == arcade.key.RIGHT and self.card_select == "S" and self.sheep_position != 0:
-            self.sheep.change_angle = -ANGLE
-            self.sheep.update()
-            self.card_select = None
+    def on_mouse_release(self,x,y,buttons,modifiers):
+        self.button.check_mouse_release(x,y)
+
+    def on_submit(self):
+        self.playing("C",2,False,False,1)
+
+
+    def playing(self, card, amount,draw_blind,draw,player):
+        
+        """Called whenever a key is pressed. """
+        print(amount,card,player,self.animal_position_dict[card])
+        if amount == 2 and self.animal_position_dict[card] == 0:
+            print("init i sus")
+            self.center_all_dict[card].remove_from_sprite_lists()
+            self.animal_all_dict[card].set_pos(self.animal_all_dict[card].center_x, self.animal_all_dict[card].center_y)
+            self.animal_all_dict[card].change_angle = -(ANGLE * player)
+            self.animal_all_dict[card].update()                
+            self.animal_position_dict[card] = 1
+            print("init",self.animal_position_dict[card])
+        elif amount == 2 and self.animal_position_dict[card] == 1:
+            print("go on i sus")
+            self.animal_all_dict[card].change_angle = -ANGLE
+            self.animal_all_dict[card].update()
+            print("go on")
+        else:
+            print("bug i sus")
+
 
     def on_key_release(self, key, modifiers):
         """Called when the user releases a key. """
         pass
 
-
 def main():
     """ Main method """
     window = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
-    window.setup_cow()
-    window.setup_horse()
-    window.setup_pig()
-    window.setup_sheep()
+    window.set_buttons()
+    window.setup_all_animal()
     arcade.run()
 
 
