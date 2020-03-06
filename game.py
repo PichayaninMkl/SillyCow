@@ -5,8 +5,8 @@ from card import Card
 
 SPRITE_SCALING = 0.5
 
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
+SCREEN_WIDTH = 1600
+SCREEN_HEIGHT = 900
 SCREEN_TITLE = "Silly Cow"
 
 ANGLE = 120
@@ -32,14 +32,7 @@ class MyGame(arcade.Window):
         os.chdir(file_path)
 
         # Variables that will hold sprite lists
-        self.cow_list_center = None
-        self.horse_list_center = None
-        self.pig_list_center = None
-        self.sheep_list_center = None
-        # self.cow_list = None
-        # self.horse_list = None
-        # self.pig_list = None
-        # self.sheep_list = None
+        self.card_list = arcade.SpriteList()
 
         # Set up the Card info
         self.cow_center = None
@@ -56,6 +49,7 @@ class MyGame(arcade.Window):
         self.horse_position = 0
         self.pig_position = 0
         self.sheep_position = 0
+        self.bot_button_position = 0
 
         # card select
         self.card_select = None
@@ -65,56 +59,40 @@ class MyGame(arcade.Window):
 
     def setup_cow(self):
         """ Set up the game and initialize the variables. """
-        self.cow_list_center = arcade.SpriteList()
         self.cow_center = Card("card/cow_center.png", SPRITE_SCALING)
         self.cow_center.center_x = (SCREEN_WIDTH / 2)-150
         self.cow_center.center_y = SCREEN_HEIGHT / 2
-        self.cow_list_center.append(self.cow_center)
+        self.card_list.append(self.cow_center)
 
-        # self.cow_list = arcade.SpriteList()
         self.cow = Card("card/cow.png", SPRITE_SCALING)
         self.cow.center_x = SCREEN_WIDTH * 0.45
-        # self.cow.center_y = (SCREEN_HEIGHT / 2)+400
-        # self.cow_list.append(self.cow)
 
     def setup_horse(self):
-        self.horse_list_center = arcade.SpriteList()
         self.horse_center = Card("card/horse_center.png", SPRITE_SCALING)
         self.horse_center.center_x = (SCREEN_WIDTH / 2)-50
         self.horse_center.center_y = SCREEN_HEIGHT / 2
-        self.horse_list_center.append(self.horse_center)
+        self.card_list.append(self.horse_center)
 
-        # self.horse_list = arcade.SpriteList()
         self.horse = Card("card/horse.png", SPRITE_SCALING)
         self.horse.center_x = SCREEN_WIDTH * 0.5
-        # self.horse.center_y = (SCREEN_HEIGHT / 2)+400
-        # self.horse_list.append(self.horse)
 
     def setup_pig(self):
-        self.pig_list_center = arcade.SpriteList()
         self.pig_center = Card("card/pig_center.png", SPRITE_SCALING)
         self.pig_center.center_x = (SCREEN_WIDTH / 2)+50
         self.pig_center.center_y = SCREEN_HEIGHT / 2
-        self.pig_list_center.append(self.pig_center)
+        self.card_list.append(self.pig_center)
 
-        # self.pig_list = arcade.SpriteList()
         self.pig = Card("card/pig.png", SPRITE_SCALING)
         self.pig.center_x = SCREEN_WIDTH * 0.55
-        # self.pig.center_y = (SCREEN_HEIGHT / 2)+400
-        # self.pig_list.append(self.pig)
 
     def setup_sheep(self):
-        self.sheep_list_center = arcade.SpriteList()
         self.sheep_center = Card("card/sheep_center.png", SPRITE_SCALING)
         self.sheep_center.center_x = (SCREEN_WIDTH / 2)+150
         self.sheep_center.center_y = SCREEN_HEIGHT / 2
-        self.sheep_list_center.append(self.sheep_center)
+        self.card_list.append(self.sheep_center)
 
-        # self.sheep_list = arcade.SpriteList()
         self.sheep = Card("card/sheep.png", SPRITE_SCALING)
         self.sheep.center_x = SCREEN_WIDTH * 0.6
-        # self.sheep.center_y = (SCREEN_HEIGHT / 2)+400
-        # self.sheep_list.append(self.sheep)
 
     def on_draw(self):
         """
@@ -125,14 +103,13 @@ class MyGame(arcade.Window):
         arcade.start_render()
 
         # Draw all card at center.
-        self.cow_list_center.draw()
-        self.horse_list_center.draw()
-        self.pig_list_center.draw()
-        self.sheep_list_center.draw()
+        self.card_list.draw()
         self.cow.draw()
         self.horse.draw()
         self.pig.draw()
         self.sheep.draw()
+        # arcade.draw_text("Start bot",
+        #                  (SCREEN_WIDTH / 7),(SCREEN_HEIGHT / 7), arcade.color.WHITE, 24, anchor_x="left", anchor_y="top")
 
     def on_update(self, delta_time):
         """ Movement and game logic """
@@ -142,6 +119,8 @@ class MyGame(arcade.Window):
         # self.cow_list.update()
         pass
 
+    # def on_mouse_press(self,)    
+         
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
 
@@ -220,7 +199,7 @@ class MyGame(arcade.Window):
             self.card_select = None
         elif key == arcade.key.LEFT and self.card_select == "S" and self.sheep_position != 0:
             self.sheep.change_angle = ANGLE
-            self.sheep.update(ANGLE)
+            self.sheep.update()
             self.card_select = None
         elif key == arcade.key.RIGHT and self.card_select == "S" and self.sheep_position == 0:
             self.sheep_center.remove_from_sprite_lists()
