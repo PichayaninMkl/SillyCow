@@ -40,24 +40,30 @@ class MyGame(arcade.Window):
         os.chdir(file_path)
 
         # Variables that will hold sprite lists
-        self.card_list = arcade.SpriteList()
-        self.hand_list = [arcade.SpriteList(),arcade.SpriteList(),arcade.SpriteList()]
+        self.hand_list = [arcade.SpriteList(),arcade.SpriteList(),arcade.SpriteList()] #all card in player's hand
+        self.temp_hand_card = [[None],[None],[None]] #each card in player's hand
+
         self.top_used_card_list = arcade.SpriteList()
+        self.top_used_card = None
+
         self.deck_list = arcade.SpriteList()
+        self.deck = None
+
         # Set up the Card info
+        self.card_list = arcade.SpriteList()
         self.cow_center = None
         self.horse_center = None
         self.pig_center = None
         self.sheep_center = None
+
         self.cow = None
         self.horse = None
         self.pig = None
         self.sheep = None
-        self.temp_hand_card = [[None],[None],[None]]
+
         self.button = None
-        self.deck = None
-        self.top_used_card = None
-        self.command_no = 0
+        self.command_no = 0 #in case of having list of command
+
         # set position all card
         self.cow_position = 0
         self.horse_position = 0
@@ -100,6 +106,7 @@ class MyGame(arcade.Window):
         arcade.set_background_color(arcade.color.AMAZON)
 
     def set_buttons(self):
+        # This button will do every command in COMMAND list
         button_temp = arcade.TextButton(100,100,150,50,"Play",font_size=24)
         self.button = arcade.SubmitButton(button_temp,self.on_submit,100,100,text="Play")
 
@@ -120,6 +127,7 @@ class MyGame(arcade.Window):
         # print("card in hand :",len(self.hand_list))
 
     def clear_hand(self):
+        # Clear all player's hand every turn
         for player in range(3):
             for i in range(len(self.hand_list)):
                 self.hand_list[player].remove(self.temp_hand_card[player][i])
@@ -155,10 +163,6 @@ class MyGame(arcade.Window):
             self.top_used_card_list.append(self.top_used_card) 
         else:
             print("don't have use card")
-            # self.top_used_card = Card(self.animal_picture_center["C"],SPRITE_SCALING)
-            # self.top_used_card.center_x = 1200
-            # self.top_used_card.center_y = SCREEN_HEIGHT/2
-            # self.top_used_card_list.append(self.top_used_card) 
     
     def on_draw(self):
         """
@@ -210,7 +214,7 @@ class MyGame(arcade.Window):
         mapper = ["C","H","P","S"]
         """Called whenever a key is pressed. """
         # print(amount,card,"Player:",player)
-        if draw == True:
+        if draw == True and len(USED_DECK)>=1:
             # Draw used card
             HAND[player][mapper.index(USED_DECK[-1])] += 1
             self.clear_hand()
