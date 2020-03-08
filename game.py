@@ -128,9 +128,12 @@ class MyGame(arcade.Window):
 
     def clear_hand(self):
         # Clear all player's hand every turn
-        for player in range(3):
-            for i in range(len(self.hand_list)):
-                self.hand_list[player].remove(self.temp_hand_card[player][i])
+        self.hand_list.clear()
+        self.hand_list = [arcade.SpriteList(),arcade.SpriteList(),arcade.SpriteList()]
+        # for player in range(3):
+        #     for i in range(len(self.hand_list)):
+        #         # self.hand_list[player].remove(self.temp_hand_card[player][i])
+        #         self.hand_list[player].clear()
         
 
     def setup_all_animal(self):
