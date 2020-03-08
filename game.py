@@ -14,8 +14,7 @@ SCREEN_TITLE = "Silly Cow"
 ANGLE = 120
 test = 0
 HAND = [[2,3,3,1],[3,2,3,1],[2,3,2,2]]
-HAND1 = [3,2,3,1]
-HAND2 = [2,3,2,2]
+
 USED_DECK = []
 DECK = ["C","H","P","S","C","H","P","S"]
 COMMAND = [["H",2,False,False,0],[None,0,False,True,1],["H",2,True,False,2],[None,0,True,False,0],["P",2,False,False,1],[None,0,False,True,2]]
@@ -130,11 +129,6 @@ class MyGame(arcade.Window):
         # Clear all player's hand every turn
         self.hand_list.clear()
         self.hand_list = [arcade.SpriteList(),arcade.SpriteList(),arcade.SpriteList()]
-        # for player in range(3):
-        #     for i in range(len(self.hand_list)):
-        #         # self.hand_list[player].remove(self.temp_hand_card[player][i])
-        #         self.hand_list[player].clear()
-        
 
     def setup_all_animal(self):
         counter = -3
