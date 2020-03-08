@@ -42,6 +42,7 @@ class MyGame(arcade.Window):
         # Variables that will hold sprite lists
         self.hand_list = [arcade.SpriteList(),arcade.SpriteList(),arcade.SpriteList()] #all card in player's hand
         self.temp_hand_card = [[None],[None],[None]] #each card in player's hand
+        self.list_name = ["S","P","H","C"]
 
         self.top_used_card_list = arcade.SpriteList()
         self.top_used_card = None
@@ -112,13 +113,12 @@ class MyGame(arcade.Window):
 
     def setup_hand(self,hand):
         # print("hand are:",hand)
-        list_name = ["C","H","P","S"]
         j = 0
         for player in range(3):
             for i in range(4):
                 for card_number in range(hand[player][i]):
                     self.temp_hand_card[player].append(None)
-                    self.temp_hand_card[player][j] = Card(self.animal_picture_center[list_name[i]],SPRITE_SCALING)
+                    self.temp_hand_card[player][j] = Card(self.animal_picture_center[self.list_name[i]],SPRITE_SCALING)
                     self.temp_hand_card[player][j].center_x = 300  + (j*60*(player==0)) + 1000*(player==2)
                     self.temp_hand_card[player][j].center_y = 100  + (j*40)*(player>0) + 200*(player>0)
                     self.hand_list[player].append(self.temp_hand_card[player][j])
@@ -138,8 +138,7 @@ class MyGame(arcade.Window):
 
     def setup_all_animal(self):
         counter = -3
-        list_name = ["C","H","P","S"]
-        for name in list_name:
+        for name in self.list_name:
             self.center_all_dict[name] = Card(self.animal_picture_center[name],SPRITE_SCALING)
             self.center_all_dict[name].center_x = (SCREEN_WIDTH/2) + (counter*50)
             self.center_all_dict[name].center_y = (SCREEN_HEIGHT/2)
@@ -184,8 +183,7 @@ class MyGame(arcade.Window):
 
         self.deck_list.draw()
         self.top_used_card_list.draw()
-        list_name = ["C","H","P","S"]
-        for name in list_name:
+        for name in self.list_name:
             self.animal_all_dict[name].draw()
         self.button.draw()
 
@@ -214,12 +212,11 @@ class MyGame(arcade.Window):
         draw_blind = command[2]
         draw = command[3]
         player = command[4]
-        mapper = ["C","H","P","S"]
         """Called whenever a key is pressed. """
         # print(amount,card,"Player:",player)
         if draw == True and len(USED_DECK)>=1:
             # Draw used card
-            HAND[player][mapper.index(USED_DECK[-1])] += 1
+            HAND[player][self.list_name.index(USED_DECK[-1])] += 1
             self.clear_hand()
             self.setup_hand(HAND)
             self.hand_list[player].draw()
@@ -230,7 +227,7 @@ class MyGame(arcade.Window):
             self.command_no+=1
         elif draw_blind == True and len(DECK)>=1:
             # Draw used card
-            HAND[player][mapper.index(DECK[-1])] += 1
+            HAND[player][self.list_name.index(DECK[-1])] += 1
             self.clear_hand()
             self.setup_hand(HAND)
             self.hand_list[player].draw()   
@@ -239,7 +236,7 @@ class MyGame(arcade.Window):
             DECK.pop()
             print("Player:",player," draw blind")
             self.command_no+=1
-        elif HAND[player][mapper.index(card)]<amount:
+        elif HAND[player][self.list_name.index(card)]<amount:
             # Check if card(s) in hand is suffiecient to play
             print("Player:",player," cannot play.Not enough card")
         elif amount == 2 and self.animal_position_dict[card] == 0:
@@ -249,7 +246,7 @@ class MyGame(arcade.Window):
             self.animal_all_dict[card].change_angle = -(ANGLE * (player+1))
             self.animal_all_dict[card].update()                
             self.animal_position_dict[card] = 1
-            HAND[player][mapper.index(card)] -= amount
+            HAND[player][self.list_name.index(card)] -= amount
             for i in range(amount):
                 USED_DECK.append(card) # Send used card to used Deck
 
