@@ -6,26 +6,28 @@ import asyncio
 from card import Card
 from button import TextButton
 import sillycowInit as sillycow
+from sillycow_dls import dls
 
-def converter(hand) :
+
+def converter(hand):
     listOfHand = []
-    listOfHand.insert(0,hand['S'])
-    listOfHand.insert(1,hand['P'])
-    listOfHand.insert(2,hand['H'])
-    listOfHand.insert(3,hand['C'])
+    listOfHand.insert(0, hand['S'])
+    listOfHand.insert(1, hand['P'])
+    listOfHand.insert(2, hand['H'])
+    listOfHand.insert(3, hand['C'])
     return listOfHand
 
 
-#*************************************** Set GAME *****************************************
+# *************************************** Set GAME *****************************************
 SPRITE_SCALING = 0.5
 SCREEN_WIDTH = 1600
 SCREEN_HEIGHT = 900
 SCREEN_TITLE = "Silly Cow"
 ANGLE = 120
 test = 0
-#******************************************************************************************
+# ******************************************************************************************
 
-#*************************************** Set CARD *****************************************
+# *************************************** Set CARD *****************************************
 HAND = []
 USED_DECK = []
 DECK = sillycow.create_deck()
@@ -34,11 +36,54 @@ n_player = 3
 player = sillycow.create_player(3, DECK)
 for i in range(3):
     inputHand = converter(player[i].hand)
-    HAND.insert(i,inputHand)
-    i+=1
-#******************************************************************************************
+    HAND.insert(i, inputHand)
+    i += 1
+# ******************************************************************************************
+
+# *************************************** Ai action dls ************************************
+def check_action(action: list, animal: str, old, new):
+    if new == old+1:
+        action.append(["draw", animal])
+    elif new == old-2:
+        action.append(["use_2",animal])
+    elif new == old-1:
+        action.append(["use_1",animal])
 
 
+action = []
+player_dls = player[1]
+print(player[1].hand)
+A = dls(player_dls, player.copy(), DECK.copy(), USED_DECK.copy(), farm)
+count = 0
+animal =""
+num = 0
+for i in A:
+    print("hand : ", i)
+    if count == 0:
+        check_hand = i
+        count += 1
+        print("***************************************************")
+    else:
+        if check_hand[1] != i[1]:
+            animal = "Sheep"
+            num = 1
+        elif check_hand[2] != i[2]:
+            animal = "Pig"
+            num = 2
+        elif check_hand[3] != i[3]:
+            animal = "Horse"
+            num = 3
+        elif check_hand[4] != i[4]:
+            animal = "Cow"
+            num = 4
+        else:
+            check_hand = i
+        check_action(action,animal,check_hand[num],i[num])
+        check_hand = i
+        print(action)
+        print("***************************************************")
+    print("old : ", check_hand)
+# ******************************************************************************************
 
 # COMMAND = [["H", 2, False, False, 0],
 #            [None, 0, False, True, 1],
