@@ -4,6 +4,7 @@ import math
 import time
 import asyncio
 from card import Card
+from button import TextButton
 import sillycowInit as sillycow
 from sillycow_dls import dls
 
@@ -46,56 +47,73 @@ for i in range(3):
 # *************************************** Ai action dls ************************************
 def check_action(action: list, animal: str, old, new):
     if new == old+1:
-        action.append([None,None,False,True,0])
+        action.append([None,None,False,True,1])
     elif new == old-2:
-        action.append([animal,2,False,False,0])
+        action.append([animal,2,False,False,1])
     elif new == old-1:
-        action.append([animal,1,False,False,0])
+        action.append([animal,1,False,False,1])
 
 
 action = []
-player_dls = player[0]
-print(player[0].hand)
+player_dls = player[1]
+print(player[1].hand)
 A = dls(player_dls, player.copy(), DECK.copy(), USED_DECK.copy(), farm)
 count = 0
+animal =""
+num = 0
 for i in A:
     print("hand : ", i)
     if count == 0:
         check_hand = i
         count += 1
         print("***************************************************")
-    elif check_hand[1] != i[1]:
-        check_action(action,"S",check_hand[1],i[1])
-        print(action)
-        print("***************************************************")
-        check_hand = i
-    elif check_hand[2] != i[2]:
-        check_action(action,"P",check_hand[2],i[2])
-        print(action)
-        print("***************************************************")
-        check_hand = i
-    elif check_hand[3] != i[3]:
-        check_action(action,"H",check_hand[3],i[3])
-        print(action)
-        print("***************************************************")
-        check_hand = i
-    elif check_hand[4] != i[4]:
-        check_action(action,"C",check_hand[4],i[4])
-        print(action)
-        print("***************************************************")
-        check_hand = i
+
+    
     else:
+        if check_hand[1] != i[1]:
+            animal = "S"
+            num = 1
+        elif check_hand[2] != i[2]:
+            animal = "P"
+            num = 2
+        elif check_hand[3] != i[3]:
+            animal = "H"
+            num = 3
+        elif check_hand[4] != i[4]:
+            animal = "C"
+            num = 4
+        else:
+            check_hand = i
+        check_action(action,animal,check_hand[num],i[num])
         check_hand = i
+        print(action)
+        print("***************************************************")
     print("old : ", check_hand)
 # ******************************************************************************************
 
-COMMAND = [["H", 2, False, False, 0],
-           [None, 0, False, True, 1],
+# COMMAND = [["H", 2, False, False, 0],
+#            [None, 0, False, True, 1],
+#            ["H", 2, True, False, 2],
+#            [None, 0, True, False, 0],
+#            ["P", 2, False, False, 1],
+#            [None, 0, False, True, 2]]
+COMMAND = [[None, 0, False, True, 1],
            ["H", 2, True, False, 2],
-           [None, 0, True, False, 0],
            ["P", 2, False, False, 1],
            [None, 0, False, True, 2]]
 
+class PlayTextButton(TextButton):
+    def __init__(self, center_x, center_y, action_function):
+        super().__init__(center_x, center_y, 100, 40, "Play", 24, "Arial")
+        self.action_function = action_function
+
+    def on_release(self):
+        super().on_release()
+        self.action_function()
+
+    def on_press(self):
+        super().on_press()
+        self.action_function()
 
 class MyGame(arcade.Window):
     """
@@ -124,6 +142,8 @@ class MyGame(arcade.Window):
         self.temp_hand_card = [[None], [None], [None]]
         self.list_name = ["S", "P", "H", "C"]
 
+        self.player_p = 0
+
         self.top_used_card_list = arcade.SpriteList()
         self.top_used_card = None
 
@@ -143,6 +163,11 @@ class MyGame(arcade.Window):
         self.sheep = None
 
         self.button = None
+        self.text_player_0 = None
+        self.text_key_press = None
+        self.text_no_card = None
+        self.no_card = False
+        self.key_player_0 = None
         self.command_no = 0  # in case of having list of command
 
         # set position all card
@@ -188,10 +213,24 @@ class MyGame(arcade.Window):
 
     def set_buttons(self):
         # This button will do every command in COMMAND list
-        button_temp = arcade.TextButton(
-            100, 100, 150, 50, "Play", font_size=24)
-        self.button = arcade.SubmitButton(
-            button_temp, self.on_submit, 100, 100, text="Play")
+        # button_temp = arcade.TextButton(
+        #     100, 100, 150, 50, "Play", font_size=24)
+        # self.button = arcade.SubmitButton(
+        #     button_temp, self.on_submit, 100, 150, text="Play")
+        self.button = PlayTextButton(150, 150, self.on_submit)
+
+    def set_text(self):
+        self.text_player_0 = arcade.draw_text("C:Use 2 cow       \
+            H:Use 2 horse       \
+            P:Use 2 pig     \
+            S:Use 2 sheep       \
+            A:Use 1 pig       \
+            B:Use 1 sheep     \
+            C:Draw      \
+            D:Draw blind"\
+            , 100, 40, arcade.color.WHITE, 16)
+        self.text_key_press = arcade.draw_text("------ Please Enter Key ------",0, 70, arcade.color.WHITE, 18, width=SCREEN_WIDTH, align="center")
+        self.text_no_card = arcade.draw_text("Cannot play. Not enough card!!!",0, 10, arcade.color.RED, 22, width=SCREEN_WIDTH, align="center")
 
     def setup_hand(self, hand):
         # print("hand are:",hand)
@@ -204,7 +243,7 @@ class MyGame(arcade.Window):
                         self.animal_picture_center[self.list_name[i]], SPRITE_SCALING)
                     self.temp_hand_card[player][j].center_x = 300 + \
                         (j*60*(player == 0)) + 1000*(player == 2)
-                    self.temp_hand_card[player][j].center_y = 100 + \
+                    self.temp_hand_card[player][j].center_y = 150 + \
                         (j*40)*(player > 0) + 200*(player > 0)
                     self.hand_list[player].append(
                         self.temp_hand_card[player][j])
@@ -225,7 +264,7 @@ class MyGame(arcade.Window):
                 self.animal_picture_center[name], SPRITE_SCALING)
             self.center_all_dict[name].center_x = (
                 SCREEN_WIDTH/2) + (counter*50)
-            self.center_all_dict[name].center_y = (SCREEN_HEIGHT/2)
+            self.center_all_dict[name].center_y = (SCREEN_HEIGHT/2)+100
             self.card_list.append(self.center_all_dict[name])
 
             self.animal_all_dict[name] = Card(
@@ -238,7 +277,7 @@ class MyGame(arcade.Window):
     def setup_deck(self):
         self.deck = Card(self.animal_picture_center[DECK[-1]], SPRITE_SCALING)
         self.deck.center_x = 400
-        self.deck.center_y = (SCREEN_HEIGHT/2)
+        self.deck.center_y = (SCREEN_HEIGHT/2)+100
         self.deck_list.append(self.deck)
 
     def setup_used_deck(self):
@@ -248,7 +287,7 @@ class MyGame(arcade.Window):
             self.top_used_card = Card(
                 self.animal_picture_center[USED_DECK[-1]], SPRITE_SCALING)
             self.top_used_card.center_x = 1200
-            self.top_used_card.center_y = (SCREEN_HEIGHT/2)
+            self.top_used_card.center_y = (SCREEN_HEIGHT/2)+100
             self.top_used_card_list.append(self.top_used_card)
         else:
             print("don't have use card")
@@ -272,7 +311,18 @@ class MyGame(arcade.Window):
         self.top_used_card_list.draw()
         for name in self.list_name:
             self.animal_all_dict[name].draw()
-        self.button.draw()
+        # self.button.draw()
+
+        if self.player_p == 0:
+            self.text_key_press.draw()
+            self.text_player_0.draw()
+
+        if self.key_player_0 != None or self.player_p != 0:
+            self.button.draw()
+            self.button.pressed = False
+
+        if self.no_card:
+            self.text_no_card.draw()
 
     def on_update(self, delta_time):
         """ Movement and game logic """
@@ -294,78 +344,116 @@ class MyGame(arcade.Window):
 
 
     def playing(self, command):
-        card = command[0]
-        amount = command[1]
-        draw_blind = command[2]
-        draw = command[3]
-        player = command[4]
-        """Called whenever a key is pressed. """
-        # print(amount,card,"Player:",player)
-        if draw == True and len(USED_DECK) >= 1:
-            # Draw used card
-            HAND[player][self.list_name.index(USED_DECK[-1])] += 1
-            self.clear_hand()
-            self.setup_hand(HAND)
-            self.hand_list[player].draw()
-            self.setup_used_deck()
-            self.top_used_card_list.draw()
-            USED_DECK.pop()
-            print("Player:", player, " draw")
-            self.command_no += 1
-        elif draw_blind == True and len(DECK) >= 1:
-            # Draw used card
-            HAND[player][self.list_name.index(DECK[-1])] += 1
-            self.clear_hand()
-            self.setup_hand(HAND)
-            self.hand_list[player].draw()
-            self.setup_deck()
-            self.deck_list.draw()
-            DECK.pop()
-            print("Player:", player, " draw blind")
-            self.command_no += 1
-        elif HAND[player][self.list_name.index(card)] < amount:
-            # Check if card(s) in hand is suffiecient to play
-            print("Player:", player, " cannot play.Not enough card")
-        elif amount == 1:
-            HAND[player][self.list_name.index(card)] -= amount
-            USED_DECK.append(card)
-            self.clear_hand()
-            self.setup_hand(HAND)
-            self.hand_list[player].draw()
-            # print("last used card:",USED_DECK[-1])
-            self.setup_used_deck()
-            self.top_used_card_list.draw()
-            print("Player:", player, " used ", card)
-            self.command_no += 1
 
-        elif amount == 2 and self.animal_position_dict[card] == 0:
-            # Move animal card for the first time
-            self.center_all_dict[card].remove_from_sprite_lists()
-            self.animal_all_dict[card].set_pos(
-                self.animal_all_dict[card].center_x, self.animal_all_dict[card].center_y)
-            self.animal_all_dict[card].change_angle = -(ANGLE * (player+1))
-            self.animal_all_dict[card].update()
-            self.animal_position_dict[card] = 1
-            HAND[player][self.list_name.index(card)] -= amount
-            for i in range(amount):
-                USED_DECK.append(card)  # Send used card to used Deck
+        if self.player_p==0:
+            command = None
+            command = self.key_player_0
+            self.no_card = False
 
-            self.clear_hand()
-            self.setup_hand(HAND)
-            self.hand_list[player].draw()
-            # print("last used card:",USED_DECK[-1])
-            self.setup_used_deck()
-            self.top_used_card_list.draw()
-            print("Player:", player, " move ", card)
-            self.command_no += 1
-        elif amount == 2 and self.animal_position_dict[card] == 1:
-            # Move animal card
-            self.animal_all_dict[card].change_angle = -ANGLE
-            self.animal_all_dict[card].update()
-            self.command_no += 1
-            print("Player:", player, " move ", card)
         else:
-            print("bug i sus")
+            self.command_no += 1
+        if command!=None:
+            card = command[0]
+            amount = command[1]
+            draw_blind = command[2]
+            draw = command[3]
+            player = command[4]
+            self.player_p = player
+            """Called whenever a key is pressed. """
+            # print(amount,card,"Player:",player)
+            if draw == True and len(USED_DECK) >= 1:
+                # Draw used card
+                HAND[player][self.list_name.index(USED_DECK[-1])] += 1
+                self.clear_hand()
+                self.setup_hand(HAND)
+                self.hand_list[player].draw()
+                self.setup_used_deck()
+                self.top_used_card_list.draw()
+                USED_DECK.pop()
+                print("Player:", player, " draw")
+                # self.command_no += 1
+            elif draw_blind == True and len(DECK) >= 1:
+                # Draw used card
+                HAND[player][self.list_name.index(DECK[-1])] += 1
+                self.clear_hand()
+                self.setup_hand(HAND)
+                self.hand_list[player].draw()
+                self.setup_deck()
+                self.deck_list.draw()
+                DECK.pop()
+                print("Player:", player, " draw blind")
+                # self.command_no += 1
+            elif HAND[player][self.list_name.index(card)] < amount:
+                # Check if card(s) in hand is suffiecient to play
+                print("Player:", player, " cannot play.Not enough card")
+                if self.player_p == 0:
+                    self.no_card = True
+                    self.key_player_0 = None
+            elif amount == 1:
+                HAND[player][self.list_name.index(card)] -= amount
+                USED_DECK.append(card)
+                self.clear_hand()
+                self.setup_hand(HAND)
+                self.hand_list[player].draw()
+                # print("last used card:",USED_DECK[-1])
+                self.setup_used_deck()
+                self.top_used_card_list.draw()
+                print("Player:", player, " used ", card)
+                self.command_no += 1        
+            elif amount == 2 and self.animal_position_dict[card] == 0:
+                # Move animal card for the first time
+                self.center_all_dict[card].remove_from_sprite_lists()
+                self.animal_all_dict[card].set_pos(
+                    self.animal_all_dict[card].center_x, self.animal_all_dict[card].center_y)
+                self.animal_all_dict[card].change_angle = -(ANGLE * (player+1))
+                self.animal_all_dict[card].update()
+                self.animal_position_dict[card] = 1
+                HAND[player][self.list_name.index(card)] -= amount
+                for i in range(amount):
+                    USED_DECK.append(card)  # Send used card to used Deck
+
+                self.clear_hand()
+                self.setup_hand(HAND)
+                self.hand_list[player].draw()
+                # print("last used card:",USED_DECK[-1])
+                self.setup_used_deck()
+                self.top_used_card_list.draw()
+                print("Player:", player, " move ", card)
+                # self.command_no += 1
+            elif amount == 2 and self.animal_position_dict[card] == 1:
+                # Move animal card
+                self.animal_all_dict[card].change_angle = -ANGLE
+                self.animal_all_dict[card].update()
+                # self.command_no += 1
+                print("Player:", player, " move ", card)
+            else:
+                print("bug i sus")
+
+            # if not self.no_card:
+            if self.player_p!=2:
+                self.player_p += 1
+            else:
+                self.player_p = 0
+            self.key_player_0 = None
+
+    def on_key_press(self, key, modifiers):
+        """Called whenever a key is pressed. """
+        if key == arcade.key.C:
+            self.key_player_0 = ["C", 2, False, False, 0]
+        elif key == arcade.key.H:
+            self.key_player_0 = ["H", 2, False, False, 0]
+        elif key == arcade.key.P:
+            self.key_player_0 = ["P", 2, False, False, 0]
+        elif key == arcade.key.S:
+            self.key_player_0 = ["S", 2, False, False, 0]
+        elif key == arcade.key.A:
+            self.key_player_0 = ["P", 1, False, False, 0]
+        elif key == arcade.key.B:
+            self.key_player_0 = ["S", 1, False, False, 0]
+        elif key == arcade.key.C:
+            self.key_player_0 = [None, 0, False, True, 0]
+        elif key == arcade.key.D:
+            self.key_player_0 = [None, 0, True, False, 0]
 
         return True       
 
@@ -378,6 +466,7 @@ def main():
     """ Main method """
     window = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
     window.set_buttons()
+    window.set_text()
     window.setup_used_deck()
     window.setup_deck()
     window.setup_hand(HAND)
