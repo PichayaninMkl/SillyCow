@@ -38,20 +38,24 @@ for i in range(3):
     HAND.insert(i, inputHand)
     i += 1
 # ******************************************************************************************
-
+#  card = command[0]
+#         amount = command[1]
+#         draw_blind = command[2]
+#         draw = command[3]
+#         player = command[4]
 # *************************************** Ai action dls ************************************
 def check_action(action: list, animal: str, old, new):
     if new == old+1:
-        action.append(["draw", animal])
+        action.append([None,None,False,True,0])
     elif new == old-2:
-        action.append(["use_2",animal])
+        action.append([animal,2,False,False,0])
     elif new == old-1:
-        action.append(["use_1",animal])
+        action.append([animal,1,False,False,0])
 
 
 action = []
-player_dls = player[1]
-print(player[1].hand)
+player_dls = player[0]
+print(player[0].hand)
 A = dls(player_dls, player.copy(), DECK.copy(), USED_DECK.copy(), farm)
 count = 0
 for i in A:
@@ -61,22 +65,22 @@ for i in A:
         count += 1
         print("***************************************************")
     elif check_hand[1] != i[1]:
-        check_action(action,"Sheep",check_hand[1],i[1])
+        check_action(action,"S",check_hand[1],i[1])
         print(action)
         print("***************************************************")
         check_hand = i
     elif check_hand[2] != i[2]:
-        check_action(action,"Pig",check_hand[2],i[2])
+        check_action(action,"P",check_hand[2],i[2])
         print(action)
         print("***************************************************")
         check_hand = i
     elif check_hand[3] != i[3]:
-        check_action(action,"Horse",check_hand[3],i[3])
+        check_action(action,"H",check_hand[3],i[3])
         print(action)
         print("***************************************************")
         check_hand = i
     elif check_hand[4] != i[4]:
-        check_action(action,"Cow",check_hand[4],i[4])
+        check_action(action,"C",check_hand[4],i[4])
         print(action)
         print("***************************************************")
         check_hand = i
@@ -227,7 +231,7 @@ class MyGame(arcade.Window):
             self.animal_all_dict[name] = Card(
                 self.animal_picture_rotate[name], SPRITE_SCALING)
             self.animal_all_dict[name].center_x = SCREEN_WIDTH * \
-                (0.4+(0.05*(counter+4)))
+                (0.4+(0.01*(counter+4)))
             # print(name," position: ",self.animal_all_dict[name].)
             counter = counter + 2
 
@@ -285,7 +289,9 @@ class MyGame(arcade.Window):
         self.button.check_mouse_release(x, y)
 
     def on_submit(self):
-        self.playing(COMMAND[self.command_no])
+        self.playing(action[self.command_no])
+
+
 
     def playing(self, command):
         card = command[0]
@@ -320,6 +326,18 @@ class MyGame(arcade.Window):
         elif HAND[player][self.list_name.index(card)] < amount:
             # Check if card(s) in hand is suffiecient to play
             print("Player:", player, " cannot play.Not enough card")
+        elif amount == 1:
+            HAND[player][self.list_name.index(card)] -= amount
+            USED_DECK.append(card)
+            self.clear_hand()
+            self.setup_hand(HAND)
+            self.hand_list[player].draw()
+            # print("last used card:",USED_DECK[-1])
+            self.setup_used_deck()
+            self.top_used_card_list.draw()
+            print("Player:", player, " used ", card)
+            self.command_no += 1
+
         elif amount == 2 and self.animal_position_dict[card] == 0:
             # Move animal card for the first time
             self.center_all_dict[card].remove_from_sprite_lists()
@@ -348,6 +366,8 @@ class MyGame(arcade.Window):
             print("Player:", player, " move ", card)
         else:
             print("bug i sus")
+
+        return True       
 
     def on_key_release(self, key, modifiers):
         """Called when the user releases a key. """
