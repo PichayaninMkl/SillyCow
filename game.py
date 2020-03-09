@@ -54,34 +54,33 @@ player_dls = player[1]
 print(player[1].hand)
 A = dls(player_dls, player.copy(), DECK.copy(), USED_DECK.copy(), farm)
 count = 0
+animal =""
+num = 0
 for i in A:
     print("hand : ", i)
     if count == 0:
         check_hand = i
         count += 1
         print("***************************************************")
-    elif check_hand[1] != i[1]:
-        check_action(action,"Sheep",check_hand[1],i[1])
-        print(action)
-        print("***************************************************")
-        check_hand = i
-    elif check_hand[2] != i[2]:
-        check_action(action,"Pig",check_hand[2],i[2])
-        print(action)
-        print("***************************************************")
-        check_hand = i
-    elif check_hand[3] != i[3]:
-        check_action(action,"Horse",check_hand[3],i[3])
-        print(action)
-        print("***************************************************")
-        check_hand = i
-    elif check_hand[4] != i[4]:
-        check_action(action,"Cow",check_hand[4],i[4])
-        print(action)
-        print("***************************************************")
-        check_hand = i
     else:
+        if check_hand[1] != i[1]:
+            animal = "Sheep"
+            num = 1
+        elif check_hand[2] != i[2]:
+            animal = "Pig"
+            num = 2
+        elif check_hand[3] != i[3]:
+            animal = "Horse"
+            num = 3
+        elif check_hand[4] != i[4]:
+            animal = "Cow"
+            num = 4
+        else:
+            check_hand = i
+        check_action(action,animal,check_hand[num],i[num])
         check_hand = i
+        print(action)
+        print("***************************************************")
     print("old : ", check_hand)
 # ******************************************************************************************
 
