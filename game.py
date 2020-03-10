@@ -374,8 +374,8 @@ class MyGame(arcade.Window):
             self.button2.pressed = False
 
     def on_update(self, delta_time):
-        if(self.start_sim and (self.command_no < len(action)-1)):
-            print("Command No:",self.command_no,"len action",len(action))
+        if(self.start_sim and (self.command_no < len(action))):
+            print("Command No:",self.command_no,"len action",len(action)-1)
             self.simulatinng()
         elif self.command_no == len(action):
             self.command_no = 0
@@ -386,7 +386,7 @@ class MyGame(arcade.Window):
         # Call update on all sprites (The sprites don't do much in this
         # example though.)
         # self.cow_list.update()
-        pass
+        
 
     def on_mouse_press(self, x, y, buttons, modifiers):
         self.button.check_mouse_press(x, y)
@@ -406,8 +406,10 @@ class MyGame(arcade.Window):
             self.setup_hand(HAND)
             self.hand_list[self.player_p].draw()
             self.playing(action[0])
-        else:
+        elif self.player_p!=0:
             self.playing(action[0])
+        else:
+            self.playing(None)
 
     def on_submit2(self):
         self.hand_temp = [HAND[self.player_p].copy(),self.player_p]
@@ -463,6 +465,7 @@ class MyGame(arcade.Window):
                 self.hand_list[self.player_p].draw()
                 
                 print("Player:", self.player_p, "think it's draw:",card)
+                # self.command_no += 1
             elif draw_blind == True and len(DECK) >= 1:
                 # Draw used card
                 HAND[self.player_p][self.list_name.index(DECK[-1])] += 1
@@ -493,7 +496,7 @@ class MyGame(arcade.Window):
                 if self.start_sim == True:
                     USED_DECK.pop()
                 print("Player:", self.player_p, " used ", card)
-                self.command_no += 1        
+                # self.command_no += 1        
             elif amount == 2 and self.animal_position_dict[card] == 0:
                 # Move animal card for the first time
                 self.center_all_dict[card].remove_from_sprite_lists()
@@ -520,7 +523,18 @@ class MyGame(arcade.Window):
                 # Move animal card
                 self.animal_all_dict[card].change_angle = -ANGLE
                 self.animal_all_dict[card].update()
+                HAND[self.player_p][self.list_name.index(card)] -= amount
+                for i in range(amount):
+                    USED_DECK.append(card)  # Send used card to used Deck
+                    self.setup_used_deck()
+                    self.top_used_card_list.draw()
+                    if self.start_sim == True  :
+                        USED_DECK.pop()
+                self.clear_hand()
+                self.setup_hand(HAND)
+                self.hand_list[self.player_p].draw()
                 # self.command_no += 1
+                print("hand card after:",HAND[self.player_p])
                 print("Player:", self.player_p, " move ", card)
             else:
                 print("bug i sus")
