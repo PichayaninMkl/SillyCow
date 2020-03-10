@@ -7,6 +7,7 @@ from card import Card
 from button import TextButton
 import sillycowInit as sillycow
 from sillycow_dls import dls
+from bfs import BFS
 
 
 def converter(hand):
@@ -39,11 +40,13 @@ for i in range(3):
     HAND.insert(i, inputHand)
     i += 1
 # ******************************************************************************************
+
 #  card = command[0]
 #         amount = command[1]
 #         draw_blind = command[2]
 #         draw = command[3]
 #         player = command[4]
+
 # *************************************** Ai action dls ************************************
 def check_action(action: list, animal: str, old, new):
     if new == old+1:
@@ -54,10 +57,48 @@ def check_action(action: list, animal: str, old, new):
         action.append([animal,1,False,False,1])
 
 
-action = []
-player_dls = player[1]
-print(player[1].hand)
-A = dls(player_dls, player.copy(), DECK.copy(), USED_DECK.copy(), farm)
+# action = []
+# player_dls = player[1]
+# print(player[1].hand)
+# A = dls(player_dls, player.copy(), DECK.copy(), USED_DECK.copy(), farm)
+# count = 0
+# animal =""
+# num = 0
+# for i in A:
+#     print("hand : ", i)
+#     if count == 0:
+#         check_hand = i
+#         count += 1
+#         print("***************************************************")
+
+    
+#     else:
+#         if check_hand[1] != i[1]:
+#             animal = "S"
+#             num = 1
+#         elif check_hand[2] != i[2]:
+#             animal = "P"
+#             num = 2
+#         elif check_hand[3] != i[3]:
+#             animal = "H"
+#             num = 3
+#         elif check_hand[4] != i[4]:
+#             animal = "C"
+#             num = 4
+#         else:
+#             check_hand = i
+#         check_action(action,animal,check_hand[num],i[num])
+#         check_hand = i
+#         print(action)
+#         print("***************************************************")
+#     print("old : ", check_hand)
+# ******************************************************************************************
+
+# *************************************** Ai action bfs ************************************
+action_bfs = []
+player_bfs = player[2]
+print(player[2].hand)
+A = BFS(player_bfs, player.copy(), farm, DECK.copy(), USED_DECK.copy())
 count = 0
 animal =""
 num = 0
@@ -68,7 +109,6 @@ for i in A:
         count += 1
         print("***************************************************")
 
-    
     else:
         if check_hand[1] != i[1]:
             animal = "S"
@@ -84,9 +124,9 @@ for i in A:
             num = 4
         else:
             check_hand = i
-        check_action(action,animal,check_hand[num],i[num])
+        check_action(action_bfs,animal,check_hand[num],i[num])
         check_hand = i
-        print(action)
+        print(action_bfs)
         print("***************************************************")
     print("old : ", check_hand)
 # ******************************************************************************************
@@ -335,8 +375,8 @@ class MyGame(arcade.Window):
     def on_mouse_press(self, x, y, buttons, modifiers):
         self.button.check_mouse_press(x, y)
 
-    def on_mouse_release(self, x, y, buttons, modifiers):
-        self.button.check_mouse_release(x, y)
+    # def on_mouse_release(self, x, y, buttons, modifiers):
+    #     self.button.check_mouse_release(x, y)
 
     def on_submit(self):
         self.playing(action[self.command_no])
