@@ -400,7 +400,7 @@ def BFS(player, player_list, farm, deck, trash):
         node = n["player"]
         action = n["action"]
         draw_state = 0
-        if action is not None and action[6:10] == "deck":
+        if action is not None and (action[5:9] == "deck"):
             draw_state = 1
         solution.append(tuple([node.field, node.hand_sheep, node.hand_pig, node.hand_horse, node.hand_cow, draw_state]))
     solution = tuple(solution)
