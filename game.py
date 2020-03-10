@@ -7,7 +7,7 @@ from card import Card
 from button import TextButton
 import sillycowInit as sillycow
 from sillycow_dls import dls
-# from bfs import BFS
+from bfs import BFS
 
 
 def converter(hand):
@@ -48,89 +48,102 @@ for i in range(3):
 #         player = command[4]
 
 # *************************************** Ai action dls ************************************
-def check_action(action: list, animal: str, old, new):
+action=[]
+
+
+def check_action(action: list, animal: str, old, new,hand_now):
     if new == old+1:
-        action.append([animal,0,False,True,1])
+        if hand_now[5] == 1:
+            action.append([animal,0,True,False,1])
+        elif hand_now[5] == 0:
+            action.append([animal,0,False,True,1])
     elif new == old-2:
         action.append([animal,2,False,False,1])
     elif new == old-1:
         action.append([animal,1,False,False,1])
 
-
-action = []
-player_dls = player[1]
-print(player[1].hand)
-A = dls(player_dls, player.copy(), DECK.copy(), USED_DECK.copy(), farm)
-count = 0
-animal =""
-num = 0
-for i in A:
-    print("hand : ", i)
-    if count == 0:
-        check_hand = i
-        count += 1
-        print("***************************************************")
-
-    
-    else:
-        if check_hand[1] != i[1]:
-            animal = "S"
-            num = 1
-        elif check_hand[2] != i[2]:
-            animal = "P"
-            num = 2
-        elif check_hand[3] != i[3]:
-            animal = "H"
-            num = 3
-        elif check_hand[4] != i[4]:
-            animal = "C"
-            num = 4
-        else:
+def dls_play(player):
+    action=[]
+    player_dls = player.copy()
+    DECK_dls = DECK.copy()
+    trash = USED_DECK.copy()
+    # print(player[1].hand)
+    A = dls(player_dls[1], player_dls, DECK_dls, trash, farm)
+    print(A)
+    count = 0
+    animal =""
+    num = 0
+    for i in A:
+        # print("hand : ", i)
+        if count == 0:
             check_hand = i
-        check_action(action,animal,check_hand[num],i[num])
-        check_hand = i
-        print(action)
-        print("***************************************************")
-    print("old : ", check_hand)
+            count += 1
+            # print("***************************************************")        
+        else:
+            if check_hand[1] != i[1]:
+                animal = "S"
+                num = 1
+            elif check_hand[2] != i[2]:
+                animal = "P"
+                num = 2
+            elif check_hand[3] != i[3]:
+                animal = "H"
+                num = 3
+            elif check_hand[4] != i[4]:
+                animal = "C"
+                num = 4
+            else:
+                check_hand = i
+            check_action(action,animal,check_hand[num],i[num],i)
+            check_hand = i
+        #     print(action)
+        #     print("***************************************************")
+        # print("old : ", check_hand)
+    return action
+
 # ******************************************************************************************
 
 # *************************************** Ai action bfs ************************************
-# action = []
-# player_bfs = player[2]
-# print(player[2].hand)
-# A = BFS(player_bfs, player.copy(), farm, DECK.copy(), USED_DECK.copy())
-# count = 0
-# animal =""
-# num = 0
-# for i in A:
-#     print("hand : ", i)
-#     if count == 0:
-#         check_hand = i
-#         count += 1
-#         print("***************************************************")
-
-#     else:
-#         if check_hand[1] != i[1]:
-#             animal = "S"
-#             num = 1
-#         elif check_hand[2] != i[2]:
-#             animal = "P"
-#             num = 2
-#         elif check_hand[3] != i[3]:
-#             animal = "H"
-#             num = 3
-#         elif check_hand[4] != i[4]:
-#             animal = "C"
-#             num = 4
-#         else:
-#             check_hand = i
-#         check_action(action_bfs,animal,check_hand[num],i[num])
-#         check_hand = i
-#         print(action_bfs)
-#         print("***************************************************")
-#     print("old : ", check_hand)
+def bfs_play(player):
+    action=[]
+    player_bfs = player.copy()
+    DECK_bfs = DECK.copy()
+    trash = USED_DECK.copy()
+    # print(player[1].hand)
+    A = BFS(player_bfs[2], player_bfs, farm, DECK_bfs, trash)
+    print(A)
+    count = 0
+    animal =""
+    num = 0
+    for i in A:
+        # print("hand : ", i)
+        if count == 0:
+            check_hand = i
+            count += 1
+            # print("***************************************************")        
+        else:
+            if check_hand[1] != i[1]:
+                animal = "S"
+                num = 1
+            elif check_hand[2] != i[2]:
+                animal = "P"
+                num = 2
+            elif check_hand[3] != i[3]:
+                animal = "H"
+                num = 3
+            elif check_hand[4] != i[4]:
+                animal = "C"
+                num = 4
+            else:
+                check_hand = i
+            check_action(action,animal,check_hand[num],i[num],i)
+            check_hand = i
+        #     print(action)
+        #     print("***************************************************")
+        # print("old : ", check_hand)
+    return action
 # ******************************************************************************************
-
+print(bfs_play(player))
 # COMMAND = [["H", 2, False, False, 0],
 #            [None, 0, False, True, 1],
 #            ["H", 2, True, False, 2],
@@ -377,7 +390,7 @@ class MyGame(arcade.Window):
         if(self.start_sim and (self.command_no < len(action))):
             print("Command No:",self.command_no,"len action",len(action)-1)
             self.simulatinng()
-        elif self.command_no == len(action):
+        elif self.command_no == len(action) and len(action) != 0:
             self.command_no = 0
             self.start_sim = False
             print("done simulating")
@@ -412,6 +425,7 @@ class MyGame(arcade.Window):
             self.playing(None)
 
     def on_submit2(self):
+        # action = dls_play(player)
         self.hand_temp = [HAND[self.player_p].copy(),self.player_p]
         print("hand_temp player",self.player_p,self.hand_temp)
 

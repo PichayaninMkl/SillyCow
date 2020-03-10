@@ -32,6 +32,7 @@ action_stack = []
 visited_state = []
 node_id = 0 # For memory measuring
 
+draw_src = 0 # 0 = trash, 1 = deck
 draw_history = []
 run_history = []
 
@@ -47,10 +48,12 @@ def play(p:Players):
     global parent_node
     global previous_node
     global action_label
+    global draw_src
     
     depth += 1
     state = (p.field, p.hand['S'], p.hand['P'], p.hand['H'], p.hand['C'])
-    action_stack.append(state)
+    action_stack.append(tuple(list(state) + [draw_src]))
+    draw_src = 0 # Reset to default
     current_node = f'Node{node_id}'
     node_id += 1
     
@@ -66,13 +69,13 @@ def play(p:Players):
     elif (state[1:] == (0, 0, 0, 0)):
         create_node(current_node, f'{state}\nHand out!', 'doublecircle', 'lightblue')
         logging('>>> Hand out!')
-        update_solution(tuple(action_stack), depth_limit+depth)
+        update_solution(tuple(action_stack), depth_limit + depth)
         
     # Deck out
     elif deck == []:
         create_node(current_node, f'{state}\nDeck out!', 'doublecircle', 'blue')
         logging('>>> Deck out!')
-        update_solution(tuple(action_stack), 2*depth_limit+depth)
+        update_solution(tuple(action_stack), 2 * depth_limit + depth)
     
     # Reach depth limit
     elif depth == depth_limit:
@@ -102,7 +105,7 @@ def play(p:Players):
                 parent_node = current_node
 
         # Play single card
-        for ctype in list(p.hand.keys())[:2]:
+        for ctype in p.hand.keys():
             if p.hand[ctype] >= 1:
                 action_label = f'discard 1 "{ctype}"'
                 logging(f'>> Play single "{ctype}"')
@@ -197,40 +200,50 @@ def card_operation(ctype: chr, p:Players, flow:str):
     global trash
     
     if flow == 'f':
+        p.hand[ctype] -= 1
+        trash.extend([ctype])
+        logging(f'>F discard a "{ctype}"')
         if ctype == 'S':
-            p.hand[ctype] -= 1
-            trash.extend([ctype])
-            logging(f'>F discard a "{ctype}"\n\t {trash}')
+            pass
         elif ctype == 'P':
-            p.hand[ctype] -= 1
-            trash.extend([ctype])
             draw_deck(p.left, ctype, flow) # p.left simulative draw, don't care ctype = "P"
-            logging(f'>F discard a "{ctype}", p[{player.index(p.left)}] draw\n\t {trash}')
-        else: # ctype == 'H' or 'C'
-            logging(f'>F a "{ctype}" has no effect')
-            pass # Found duplicated state then backtracked
+            logging(f'\t p[{player.index(p.left)}] draw')
+        elif ctype == 'H':
+            draw_deck(p.right, ctype, flow)
+            logging(f'\t p[{player.index(p.right)}] draw')
+        elif ctype == 'C':
+            draw_deck(p.left, ctype, flow)
+            draw_deck(p.right, ctype, flow)
+            logging(f'\t p[{player.index(p.left)}] and p[{player.index(p.right)}] draw')
+        logging(f'\t {trash}')
             
     elif flow == 'r':
+        p.hand[ctype] += 1
+        trash.pop()
+        logging(f'<R return a "{ctype}" to Hand')
         if ctype == 'S':
-            p.hand[ctype] += 1
-            trash.pop()
-            logging(f'<R return a "{ctype}" to hand\n\t {trash}')
+            pass
         elif ctype == 'P':
-            p.hand[ctype] += 1
-            trash.pop()
             draw_deck(p.left, ctype, flow) # p.left simulative reverse draw
-            logging(f'<R return a "{ctype}" to hand, p[{player.index(p.left)}] return a card to Deck\n\t {trash}')
-        else: # ctype == 'H' or 'C'
-            logging(f'<R a "{ctype}" has no effect')
-            pass # Found duplicated state then backtracked
+            logging(f'\t p[{player.index(p.left)}] return a card to Deck')
+        elif ctype == 'H':
+            draw_deck(p.right, ctype, flow) 
+            logging(f'\t p[{player.index(p.right)}] return a card to Deck')
+        elif ctype == 'C':
+            draw_deck(p.left, ctype, flow)
+            draw_deck(p.right, ctype, flow)
+            logging(f'\t p[{player.index(p.left)}] and p[{player.index(p.right)}] return cards to Deck')
+        logging(f'\t {trash}')
 
 def draw_deck(p:Players, ctype:str, flow:str):
     global deck
+    global draw_src
     global draw_history
                   
     if flow == 'f':
         draw_history.append({'ctype':deck.pop(), 'src':deck}) # don't care the card, draw for deck out checking
         p.hand[ctype] += 1
+        draw_src = 1
         logging(f'>F draw "{ctype}" from Deck')
     elif flow == 'r':
         card = draw_history.pop()
@@ -240,12 +253,14 @@ def draw_deck(p:Players, ctype:str, flow:str):
     
 def draw_trash(p:Players, flow:str):
     global trash
+    global draw_src
     global draw_history
     
     if flow == 'f':
         draw_history.append({'ctype':trash.pop(), 'src':trash})
         card = draw_history[-1]
         p.hand[card['ctype']] += 1
+        draw_src = 0
         logging(f'>F draw \"{card["ctype"]}\" from Trash\n\t {trash}')
     elif flow == 'r':
         card = draw_history.pop()
@@ -254,7 +269,7 @@ def draw_trash(p:Players, flow:str):
         logging(f'<R return card \"{card["ctype"]}\" to Trash\n\t {trash}')
     return card
 
-def get_clearing_ctype(field: str) -> str:    
+def get_clearing_ctype(field: str) -> str:
     for ctype in 'CHPS': # check field according type's priority
         if ctype in field:
             return ctype
@@ -263,7 +278,7 @@ def update_solution(action: Tuple, cost: int):
     global solution
     global depth_limit
 
-    if cost < solution.get(action, 2 * depth_limit + 1): # if have no the state, put certainly
+    if cost < solution.get(action, 3 * depth_limit + 1): # if have no the state, put certainly
         solution[action] = cost
         logging(f'=>> Solution {action} update with cost = {cost}\n')
     else:
@@ -283,7 +298,7 @@ def create_node(node_name:str, label:str, shape:str = 'circle', color:str = 'bla
     
     # Create new node
     dot.attr('node', shape=shape, color=color)
-    dot.node(node_name, label)
+    dot.node(node_name, f'{node_name}\n{label}')
     
     # Link with parent node
     if parent_node:

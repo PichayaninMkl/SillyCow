@@ -1,4 +1,4 @@
-from logging_ta import logging, close_log
+from writelog import write_log, close_log
 import time
 
 # import psutil
@@ -22,6 +22,15 @@ class Node:
                " P=" + str(self.hand_pig) + \
                " H=" + str(self.hand_horse) + \
                " C=" + str(self.hand_cow) + ">\n------------------------"
+
+    def is_equal(self, node):
+        boolean1 = (self.field == node.field)
+        boolean2 = (self.hand_sheep == node.hand_sheep)
+        boolean3 = (self.hand_pig == node.hand_pig)
+        boolean4 = (self.hand_horse == node.hand_horse)
+        boolean5 = (self.hand_cow == node.hand_cow)
+        return boolean1 and boolean2 and boolean3 and boolean4 and boolean5
+        # return False
 
 
 class Field:
@@ -54,25 +63,28 @@ def searching(player_root, field_root):
     }
 
     # Breadth-First Search
-    tree = []
-    queue_list = [root_node]
-    solution = []
-    # duplicate = []
+    frontier = [root_node]
+    explored = []
+
+    solution = [[], 0]
+
+    # For debug
     current_depth = 0
 
     count = 0
+    count_dup = 0
 
-    while len(queue_list) > 0:
+    while len(frontier) > 0:
         count += 1
 
-        this_node = queue_list.pop(0)
+        this_node = frontier.pop(0)
         this_node["ref_num"] = count
 
-        tree.append(this_node)
-        logging("Node : " + str(this_node["ref_num"]))
-        logging("Depth : " + str(this_node["depth"]))
-        logging(str(this_node["player"]))
-        logging(str(this_node["field"]))
+        explored.append(this_node)
+        write_log("Exploring >> Node : " + str(this_node["ref_num"]))
+        # write_log("Depth : " + str(this_node["depth"]))
+        # write_log(str(this_node["player"]))
+        # write_log(str(this_node["field"]))
 
         player = this_node["player"]
         field = this_node["field"]
@@ -82,21 +94,21 @@ def searching(player_root, field_root):
 
         # Final state
         if player.field == "" and player.hand_sheep + player.hand_pig + player.hand_horse + player.hand_cow == 0:
-            goal_state = tree[-1]
-            solution.append(goal_state)
+            goal_state = explored[-1]
+            path = [goal_state]
             prev = goal_state['parent']
             while prev is not None:
-                prev_node = tree[prev - 1]
+                prev_node = explored[prev - 1]
                 prev = prev_node['parent']
-                solution.append(prev_node)
-            solution.reverse()
-            logging("\t>> Goal state")
-            return [solution, len(tree)]
-        elif player.hand_sheep + player.hand_pig + player.hand_horse + player.hand_cow == 0 and len(player.field) > 0:
-            logging("\t>> Hand out")
+                path.append(prev_node)
+            path.reverse()
+            write_log("\t>> Goal state")
+            return [path, len(explored)]
+        if player.hand_sheep + player.hand_pig + player.hand_horse + player.hand_cow == 0:
+            write_log("\t>> Hand out")
             continue
         elif len(field.deck) == 0:
-            logging("\t>> Deck out")
+            print("\t>> Deck out")
             continue
         else:
             if player.hand_sheep >= 2:
@@ -109,7 +121,14 @@ def searching(player_root, field_root):
                     "depth": depth + 1,
                     "action": "discard_2S"
                 }
-                queue_list.append(next_node)
+                is_duplicate = False
+                for node in explored + frontier:
+                    if next_node["player"].is_equal(node["player"]):
+                        is_duplicate = True
+                        write_log("\t^^^ Duplicate Node")
+                        count_dup += 1
+                if not is_duplicate:
+                    frontier.append(next_node)
 
             if player.hand_pig >= 2:
                 out = discard_2P(player, field)
@@ -121,7 +140,14 @@ def searching(player_root, field_root):
                     "depth": depth + 1,
                     "action": "discard_2P"
                 }
-                queue_list.append(next_node)
+                is_duplicate = False
+                for node in explored + frontier:
+                    if next_node["player"].is_equal(node["player"]):
+                        is_duplicate = True
+                        write_log("\t^^^ Duplicate Node")
+                        count_dup += 1
+                if not is_duplicate:
+                    frontier.append(next_node)
 
             if player.hand_horse >= 2:
                 out = discard_2H(player, field)
@@ -133,7 +159,14 @@ def searching(player_root, field_root):
                     "depth": depth + 1,
                     "action": "discard_2H"
                 }
-                queue_list.append(next_node)
+                is_duplicate = False
+                for node in explored + frontier:
+                    if next_node["player"].is_equal(node["player"]):
+                        is_duplicate = True
+                        write_log("\t^^^ Duplicate Node")
+                        count_dup += 1
+                if not is_duplicate:
+                    frontier.append(next_node)
 
             if player.hand_cow >= 2:
                 out = discard_2C(player, field)
@@ -145,7 +178,14 @@ def searching(player_root, field_root):
                     "depth": depth + 1,
                     "action": "discard_2C"
                 }
-                queue_list.append(next_node)
+                is_duplicate = False
+                for node in explored + frontier:
+                    if next_node["player"].is_equal(node["player"]):
+                        is_duplicate = True
+                        write_log("\t^^^ Duplicate Node")
+                        count_dup += 1
+                if not is_duplicate:
+                    frontier.append(next_node)
 
             if player.hand_sheep >= 1:
                 out = discard_S(player, field)
@@ -157,7 +197,14 @@ def searching(player_root, field_root):
                     "depth": depth + 1,
                     "action": "discard_S"
                 }
-                queue_list.append(next_node)
+                is_duplicate = False
+                for node in explored + frontier:
+                    if next_node["player"].is_equal(node["player"]):
+                        is_duplicate = True
+                        write_log("\t^^^ Duplicate Node")
+                        count_dup += 1
+                if not is_duplicate:
+                    frontier.append(next_node)
 
             if player.hand_pig >= 1:
                 out = discard_P(player, field)
@@ -169,7 +216,52 @@ def searching(player_root, field_root):
                     "depth": depth + 1,
                     "action": "discard_P"
                 }
-                queue_list.append(next_node)
+                is_duplicate = False
+                for node in explored + frontier:
+                    if next_node["player"].is_equal(node["player"]):
+                        is_duplicate = True
+                        write_log("\t^^^ Duplicate Node")
+                        count_dup += 1
+                if not is_duplicate:
+                    frontier.append(next_node)
+
+            if player.hand_horse >= 1:
+                out = discard_H(player, field)
+                next_node = {
+                    "ref_num": -1,
+                    "player": out["player"],
+                    "field": out["field"],
+                    "parent": ref_num,
+                    "depth": depth + 1,
+                    "action": "discard_H"
+                }
+                is_duplicate = False
+                for node in explored + frontier:
+                    if next_node["player"].is_equal(node["player"]):
+                        is_duplicate = True
+                        write_log("\t^^^ Duplicate Node")
+                        count_dup += 1
+                if not is_duplicate:
+                    frontier.append(next_node)
+
+            if player.hand_cow >= 1:
+                out = discard_C(player, field)
+                next_node = {
+                    "ref_num": -1,
+                    "player": out["player"],
+                    "field": out["field"],
+                    "parent": ref_num,
+                    "depth": depth + 1,
+                    "action": "discard_C"
+                }
+                is_duplicate = False
+                for node in explored + frontier:
+                    if next_node["player"].is_equal(node["player"]):
+                        is_duplicate = True
+                        write_log("\t^^^ Duplicate Node")
+                        count_dup += 1
+                if not is_duplicate:
+                    frontier.append(next_node)
 
             if len(field.trash) > 0:
                 out = draw_trash(player, field)
@@ -181,7 +273,14 @@ def searching(player_root, field_root):
                     "depth": depth + 1,
                     "action": "draw_trash"
                 }
-                queue_list.append(next_node)
+                is_duplicate = False
+                for node in explored + frontier:
+                    if next_node["player"].is_equal(node["player"]):
+                        is_duplicate = True
+                        write_log("\t^^^ Duplicate Node")
+                        count_dup += 1
+                if not is_duplicate:
+                    frontier.append(next_node)
 
             if len(field.deck) > 0:
                 out = draw_deck(player, field, 'S')
@@ -193,7 +292,14 @@ def searching(player_root, field_root):
                     "depth": depth + 1,
                     "action": "draw_deck_S"
                 }
-                queue_list.append(next_node)
+                is_duplicate = False
+                for node in explored + frontier:
+                    if next_node["player"].is_equal(node["player"]):
+                        is_duplicate = True
+                        write_log("\t^^^ Duplicate Node")
+                        count_dup += 1
+                if not is_duplicate:
+                    frontier.append(next_node)
 
                 out = draw_deck(player, field, 'P')
                 next_node = {
@@ -204,7 +310,14 @@ def searching(player_root, field_root):
                     "depth": depth + 1,
                     "action": "draw_deck_P"
                 }
-                queue_list.append(next_node)
+                is_duplicate = False
+                for node in explored + frontier:
+                    if next_node["player"].is_equal(node["player"]):
+                        is_duplicate = True
+                        write_log("\t^^^ Duplicate Node")
+                        count_dup += 1
+                if not is_duplicate:
+                    frontier.append(next_node)
 
                 out = draw_deck(player, field, 'H')
                 next_node = {
@@ -215,7 +328,14 @@ def searching(player_root, field_root):
                     "depth": depth + 1,
                     "action": "draw_deck_H"
                 }
-                queue_list.append(next_node)
+                is_duplicate = False
+                for node in explored + frontier:
+                    if next_node["player"].is_equal(node["player"]):
+                        is_duplicate = True
+                        write_log("\t^^^ Duplicate Node")
+                        count_dup += 1
+                if not is_duplicate:
+                    frontier.append(next_node)
 
                 out = draw_deck(player, field, 'C')
                 next_node = {
@@ -226,29 +346,41 @@ def searching(player_root, field_root):
                     "depth": depth + 1,
                     "action": "draw_deck_C"
                 }
-                queue_list.append(next_node)
-                # is_dup = False
-                # for node in duplicate:
-                #     if node["player"] == next_node["player"] and node["field"] == next_node["field"]:
-                #         print("Duplicate node")
-                #         is_dup = True
-                # if not is_dup:
-                #     duplicate.append({
-                #         "player": next_node["player"],
-                #         "field": next_node["field"],
-                #     })
-                #     queue_list.append(next_node)
+                is_duplicate = False
+                for node in explored + frontier:
+                    if next_node["player"].is_equal(node["player"]):
+                        is_duplicate = True
+                        write_log("\t^^^ Duplicate Node")
+                        count_dup += 1
+                if not is_duplicate:
+                    frontier.append(next_node)
+                # is_duplicate = False
+                # for n in explored + frontier:
+                #     next_left = next_node["field"].left
+                #     next_right = next_node["field"].right
+                #     left = n["field"].left
+                #     right = n["field"].right
+                #     if next_node["player"] == n["player"] and next_left == left and next_right == right:
+                #         is_duplicate = True
+                #         # write_log("\t^^^ Duplicate Node")
+                #         print("\t>> Duplicate node")
+                #         count_dup += 1
+                # if not is_duplicate:
+                #     frontier.append(next_node)
+    return solution
 
 
+# def BFS(player,player_list, farm, deck, trash):
 def BFS(player, player_list, farm, deck, trash):
     start_time = time.time()
     # psutil.cpu_percent()
     # psutil.virtual_memory()
     # mem = dict(psutil.virtual_memory()._asdict())
-    
+
     left_field = player.left.field
     right_field = player.right.field
 
+    # root_node = Node(field, hand['S'], hand['P'], hand['H'], hand['C'])
     root_node = Node(player.field, player.hand['S'], player.hand['P'], player.hand['H'], player.hand['C'])
     root_field = Field(left_field, right_field, farm, deck, trash)
 
@@ -257,24 +389,30 @@ def BFS(player, player_list, farm, deck, trash):
     n_node = out.copy()[1]
 
     runtime = time.time() - start_time
-    logging("Run-time : " + str('%.4f' % runtime) + " seconds")
-    logging("Node(s) : " + str(n_node))
+    write_log("")
+    write_log(get_str_action_path(path))
+    write_log("Run-time : " + str('%.4f' % runtime) + " seconds")
+    write_log("Node(s) : " + str(n_node))
     # logging("Space usage : " + str(math.ceil(mem['used'] / (1024 ** 2))) + " Mb")
 
     solution = []
     for n in path:
         node = n["player"]
-        solution.append(tuple([node.field, node.hand_sheep, node.hand_pig, node.hand_horse, node.hand_cow]))
+        action = n["action"]
+        draw_state = 0
+        if action is not None and action[6:10] == "deck":
+            draw_state = 1
+        solution.append(tuple([node.field, node.hand_sheep, node.hand_pig, node.hand_horse, node.hand_cow, draw_state]))
     solution = tuple(solution)
-    logging("")
-    logging(str(solution))
+    write_log("")
+    write_log(str(solution))
     close_log()
     return solution
 
 
 # ( / )
 def discard_2S(player, field):
-    logging("\t >>> DO ACTION : Discard 2 Sheep cards")
+    write_log("\t >>> DO ACTION : Discard 2 Sheep cards")
 
     player = Node(player.field, player.hand_sheep, player.hand_pig, player.hand_horse, player.hand_cow)
     field = Field(field.left, field.right, field.farm, field.deck.copy(), field.trash.copy())
@@ -283,28 +421,11 @@ def discard_2S(player, field):
     field.trash.append('S')
     field.trash.append('S')
 
-    if "S" in player.field:
-        player.field = player.field.replace("S", "")
-        field.left += "S"
-    elif "S" in field.left:
-        field.left = field.left.replace("S", "")
-        field.right += "S"
-    elif "S" in field.right:
-        field.right = field.right.replace("S", "")
-        player.field += "S"
-    else:
-        field.farm = field.farm.replace("S", "")
-        field.left += "S"
-
-    return {
-        "player": player,
-        "field": field
-    }
+    return animal_run('S', player, field)
 
 
-# ( / )
 def discard_2P(player, field):
-    logging("\t >>> DO ACTION : Discard 2 Pig cards")
+    write_log("\t >>> DO ACTION : Discard 2 Pig cards")
 
     player = Node(player.field, player.hand_sheep, player.hand_pig, player.hand_horse, player.hand_cow)
     field = Field(field.left, field.right, field.farm, field.deck.copy(), field.trash.copy())
@@ -313,28 +434,11 @@ def discard_2P(player, field):
     field.trash.append('P')
     field.trash.append('P')
 
-    if "P" in player.field:
-        player.field = player.field.replace("P", "")
-        field.left += "P"
-    elif "P" in field.left:
-        field.left = field.left.replace("P", "")
-        field.right += "P"
-    elif "P" in field.right:
-        field.right = field.right.replace("P", "")
-        player.field += "P"
-    else:
-        field.farm = field.farm.replace("P", "")
-        field.left += "P"
-
-    return {
-        "player": player,
-        "field": field
-    }
+    return animal_run('P', player, field)
 
 
-# ( / )
 def discard_2H(player, field):
-    logging("\t >>> DO ACTION : Discard 2 Horse cards")
+    write_log("\t >>> DO ACTION : Discard 2 Horse cards")
 
     player = Node(player.field, player.hand_sheep, player.hand_pig, player.hand_horse, player.hand_cow)
     field = Field(field.left, field.right, field.farm, field.deck.copy(), field.trash.copy())
@@ -343,28 +447,11 @@ def discard_2H(player, field):
     field.trash.append('H')
     field.trash.append('H')
 
-    if "H" in player.field:
-        player.field = player.field.replace("H", "")
-        field.left += "H"
-    elif "H" in field.left:
-        field.left = field.left.replace("H", "")
-        field.right += "H"
-    elif "H" in field.right:
-        field.right = field.right.replace("H", "")
-        player.field += "H"
-    else:
-        field.farm = field.farm.replace("H", "")
-        field.left += "H"
-
-    return {
-        "player": player,
-        "field": field
-    }
+    return animal_run('H', player, field)
 
 
-# ( / )
 def discard_2C(player, field):
-    logging("\t >>> DO ACTION : Discard 2 Cow cards")
+    write_log("\t >>> DO ACTION : Discard 2 Cow cards")
 
     player = Node(player.field, player.hand_sheep, player.hand_pig, player.hand_horse, player.hand_cow)
     field = Field(field.left, field.right, field.farm, field.deck.copy(), field.trash.copy())
@@ -373,28 +460,11 @@ def discard_2C(player, field):
     field.trash.append('C')
     field.trash.append('C')
 
-    if "C" in player.field:
-        player.field = player.field.replace("C", "")
-        field.left += "C"
-    elif "C" in field.left:
-        field.left = field.left.replace("C", "")
-        field.right += "C"
-    elif "C" in field.right:
-        field.right = field.right.replace("C", "")
-        player.field += "C"
-    else:
-        field.farm = field.farm.replace("C", "")
-        field.left += "C"
-
-    return {
-        "player": player,
-        "field": field
-    }
+    return animal_run('C', player, field)
 
 
-# ( / )
 def discard_S(player, field):
-    logging("\t >>> DO ACTION : Discard a Sheep card")
+    write_log("\t >>> DO ACTION : Discard a Sheep card")
 
     player = Node(player.field, player.hand_sheep, player.hand_pig, player.hand_horse, player.hand_cow)
     field = Field(field.left, field.right, field.farm, field.deck.copy(), field.trash.copy())
@@ -408,9 +478,8 @@ def discard_S(player, field):
     }
 
 
-# ( / )
 def discard_P(player, field):
-    logging("\t >>> DO ACTION : Discard a Pig cards")
+    write_log("\t >>> DO ACTION : Discard a Pig card")
 
     player = Node(player.field, player.hand_sheep, player.hand_pig, player.hand_horse, player.hand_cow)
     field = Field(field.left, field.right, field.farm, field.deck.copy(), field.trash.copy())
@@ -426,9 +495,44 @@ def discard_P(player, field):
     }
 
 
-# ( / )
+def discard_H(player, field):
+    write_log("\t >>> DO ACTION : Discard a Horse card")
+
+    player = Node(player.field, player.hand_sheep, player.hand_pig, player.hand_horse, player.hand_cow)
+    field = Field(field.left, field.right, field.farm, field.deck.copy(), field.trash.copy())
+
+    player.hand_horse -= 1
+    field.trash.append('H')
+    if len(field.deck) > 0:
+        field.deck.pop(deck_top)
+
+    return {
+        "player": player,
+        "field": field
+    }
+
+
+def discard_C(player, field):
+    write_log("\t >>> DO ACTION : Discard a Cow card")
+
+    player = Node(player.field, player.hand_sheep, player.hand_pig, player.hand_horse, player.hand_cow)
+    field = Field(field.left, field.right, field.farm, field.deck.copy(), field.trash.copy())
+
+    player.hand_cow -= 1
+    field.trash.append('C')
+    if len(field.deck) > 0:
+        field.deck.pop(deck_top)
+    if len(field.deck) > 0:
+        field.deck.pop(deck_top)
+
+    return {
+        "player": player,
+        "field": field
+    }
+
+
 def draw_trash(player, field):
-    logging("\t >>> DO ACTION : Draw a card (Top) from trash and skip")
+    write_log("\t >>> DO ACTION : Draw a card (Top) from trash and skip")
 
     player = Node(player.field, player.hand_sheep, player.hand_pig, player.hand_horse, player.hand_cow)
     field = Field(field.left, field.right, field.farm, field.deck.copy(), field.trash.copy())
@@ -449,9 +553,8 @@ def draw_trash(player, field):
     }
 
 
-# ( / )
 def draw_deck(player, field, card):
-    logging("\t >>> DO ACTION : Draw a card (Random : " + card + " ) from deck and skip")
+    write_log("\t >>> DO ACTION : Draw a card (Random : " + card + " ) from deck and skip")
 
     player = Node(player.field, player.hand_sheep, player.hand_pig, player.hand_horse, player.hand_cow)
     field = Field(field.left, field.right, field.farm, field.deck.copy(), field.trash.copy())
@@ -472,6 +575,25 @@ def draw_deck(player, field, card):
     }
 
 
+def animal_run(animal, player, field):
+    if animal in player.field:
+        player.field = player.field.replace(animal, "")
+        field.left += animal
+    elif animal in field.left:
+        field.left = field.left.replace(animal, "")
+        field.right += animal
+    elif animal in field.right:
+        field.right = field.right.replace(animal, "")
+        player.field += animal
+    else:
+        field.farm = field.farm.replace(animal, "")
+        field.left += animal
+    return {
+        "player": player,
+        "field": field
+    }
+
+
 def get_str_action_path(solution):
     st = ""
     for n in solution:
@@ -482,7 +604,3 @@ def get_str_action_path(solution):
         st += " -> "
     st += "GOAL"
     return st
-
-
-# s = BFS("", {"S": 2, "P": 0, "H": 0, "C": 0}, "", "", "SPHC", ["S", "S", "S", "S"], [])
-# print(s)
