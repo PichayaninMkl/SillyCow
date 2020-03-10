@@ -429,12 +429,12 @@ class MyGame(arcade.Window):
             else:
                 print("bug i sus")
 
-            # if not self.no_card:
-            if self.player_p!=2:
-                self.player_p += 1
-            else:
-                self.player_p = 0
-            self.key_player_0 = None
+            if not self.no_card:
+                if self.player_p!=2:
+                    self.player_p += 1
+                else:
+                    self.player_p = 0
+                self.key_player_0 = None
 
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
