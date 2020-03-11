@@ -143,7 +143,7 @@ def bfs_play(player):
         # print("old : ", check_hand)
     return action
 # ******************************************************************************************
-print(bfs_play(player))
+# print(bfs_play(player))
 # COMMAND = [["H", 2, False, False, 0],
 #            [None, 0, False, True, 1],
 #            ["H", 2, True, False, 2],
@@ -204,6 +204,9 @@ class MyGame(arcade.Window):
         self.deck = None
 
         self.hand_temp = [None,0]
+        self.field_temp = None
+        self.animal_center_temp = None
+
         self.start_sim = False
         # Set up the Card info
         self.card_list = arcade.SpriteList()
@@ -414,21 +417,60 @@ class MyGame(arcade.Window):
         self.start_sim = False
         if(self.hand_temp[1] == self.player_p and self.player_p != 0):
             print(self.hand_temp[0],"player:",self.player_p)
+            self.setup_used_deck()
+            self.top_used_card_list.draw()
             HAND[self.player_p] = self.hand_temp[0]
+            self.animal_position_dict = self.animal_center_temp
+            counter = -3
+            
+            for animal in self.list_name:
+                self.animal_all_dict[animal].change_angle = self.field_temp[animal]
+                if(self.animal_position_dict[animal]==0):
+                    self.animal_all_dict[animal].remove_from_sprite_lists()
+
+                    self.center_all_dict[animal] = Card(
+                    self.animal_picture_center[animal], SPRITE_SCALING)
+                    self.center_all_dict[animal].center_x = (
+                        SCREEN_WIDTH/2) + (counter*50)
+                    self.center_all_dict[animal].center_y = (SCREEN_HEIGHT/2)
+                    self.card_list.append(self.center_all_dict[animal])
+                    # self.card_list.draw()
+                    self.animal_all_dict[name] = Card(
+                        self.animal_picture_rotate[name], SPRITE_SCALING)
+                    self.animal_all_dict[name].center_x = SCREEN_WIDTH * \
+                        (0.4+(0.01*(counter+4)))
+                else:
+                    self.animal_all_dict[animal].change_angle += self.field_temp[animal]
+                    self.animal_all_dict[animal].update()
+                    for name in self.list_name:
+                        self.animal_all_dict[name].draw()
+                counter = counter + 2
+            
             self.hand_temp = None
             self.setup_hand(HAND)
             self.hand_list[self.player_p].draw()
-            self.playing(action[0])
+            # self.playing(action[0])
         elif self.player_p!=0:
             self.playing(action[0])
         else:
             self.playing(None)
 
     def on_submit2(self):
-        # action = dls_play(player)
+        print("All action:",action)
         self.hand_temp = [HAND[self.player_p].copy(),self.player_p]
         print("hand_temp player",self.player_p,self.hand_temp)
-
+        self.field_temp = {
+            "S":self.animal_all_dict["S"].get_angle(),
+            "P":self.animal_all_dict["P"].get_angle(),
+            "H":self.animal_all_dict["H"].get_angle(),
+            "C":self.animal_all_dict["C"].get_angle()
+        }
+        self.animal_center_temp = self.animal_position_dict
+        # print("S angle:",self.field_temp["S"])
+        # print("P angle:",self.field_temp["P"])
+        # print("H angle:",self.field_temp["H"])
+        # print("C angle:",self.field_temp["C"])
+        # print(self.animal_center_temp)
         self.start_sim = True
             
     def simulatinng(self):
@@ -442,12 +484,15 @@ class MyGame(arcade.Window):
     #     return True
 
     def playing(self, command):   
-        
+        global player
+        global action
         if self.player_p==0:
+            action = dls_play(player)
             command = None
             command = self.key_player_0
             self.no_card = False
-
+        elif self.player_p == 1 and self.start_sim!=True:
+            action = bfs_play(player)
         else:
             self.command_no += 1
 
@@ -456,9 +501,8 @@ class MyGame(arcade.Window):
             amount = command[1]
             draw_blind = command[2]
             draw = command[3]
-            player = command[4]
-            self.player_p = player
-            print("Sim?:",self.start_sim,"hand card before",HAND[player])
+            self.player_p = command[4]
+            print("Sim?:",self.start_sim,"hand card before",HAND[self.player_p])
             """Called whenever a key is pressed. """
             # print(amount,card,"Player:",player)
             if (draw == True and len(USED_DECK) >= 1) and self.start_sim != True:
@@ -560,6 +604,7 @@ class MyGame(arcade.Window):
                     self.player_p = 0
                 self.key_player_0 = None
             self.set_buttons()
+
             return True
 
     def on_key_press(self, key, modifiers):
