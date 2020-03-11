@@ -319,7 +319,7 @@ def dls(p:Players, percept_player:List[Players], percept_deck:List, percept_tras
     global farm
     global solution
     global log
-
+    print("Percept from dls(player 1)","Field",p.field,"Hand:",p.hand)
     player = percept_player
     deck = percept_deck
     trash = percept_trash
