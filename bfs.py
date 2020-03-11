@@ -393,6 +393,8 @@ def BFS(player, player_list, farm, deck, trash):
     runtime = time.time() - start_time
     write_log("")
     write_log(get_str_action_path(path))
+    print("Run-time : " + str('%.4f' % runtime) + " seconds")
+    print("Node(s) : " + str(n_node))
     write_log("Run-time : " + str('%.4f' % runtime) + " seconds")
     write_log("Node(s) : " + str(n_node))
     # logging("Space usage : " + str(math.ceil(mem['used'] / (1024 ** 2))) + " Mb")

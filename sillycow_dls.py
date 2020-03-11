@@ -342,6 +342,7 @@ def dls(p:Players, percept_player:List[Players], percept_deck:List, percept_tras
     dot.save(f'graphviz/dls-{ts}.gv') # Save graph
     
     # Return solution
+    print(f'\nElapsed time = {elapsed} seconds\nCreated node = {node_id} nodes')
     logging(f'\nElapsed time = {elapsed} seconds\nCreated node = {node_id} nodes')
     if not solution:
         logging(f'\nHave no Solution')
