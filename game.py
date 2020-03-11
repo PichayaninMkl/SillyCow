@@ -35,6 +35,13 @@ DECK = sillycow.create_deck()
 farm = 'SPHC'
 n_player = 3
 player = sillycow.create_player(3, DECK)
+# player[0].left = player[1]
+# player[1].left = player[2]
+# player[1].left = player[0]
+# player[0].right = player[2]
+# player[2].right = player[1]
+# player[1].right = player[0]
+
 for i in range(3):
     inputHand = converter(player[i].hand)
     HAND.insert(i, inputHand)
@@ -51,16 +58,16 @@ for i in range(3):
 action=[]
 
 
-def check_action(action: list, animal: str, old, new,hand_now):
+def check_action(action: list, animal: str, old, new,hand_now,player : int):
     if new == old+1:
         if hand_now[5] == 1:
-            action.append([animal,0,True,False,1])
+            action.append([animal,0,True,False,player])
         elif hand_now[5] == 0:
-            action.append([animal,0,False,True,1])
+            action.append([animal,0,False,True,player])
     elif new == old-2:
-        action.append([animal,2,False,False,1])
+        action.append([animal,2,False,False,player])
     elif new == old-1:
-        action.append([animal,1,False,False,1])
+        action.append([animal,1,False,False,player])
 
 def dls_play(player):
     action=[]
@@ -69,7 +76,7 @@ def dls_play(player):
     trash = USED_DECK.copy()
     # print(player[1].hand)
     A = dls(player_dls[1], player_dls, DECK_dls, trash, farm)
-    print(A)
+    # print(A)
     count = 0
     animal =""
     num = 0
@@ -94,7 +101,7 @@ def dls_play(player):
                 num = 4
             else:
                 check_hand = i
-            check_action(action,animal,check_hand[num],i[num],i)
+            check_action(action,animal,check_hand[num],i[num],i,1)
             check_hand = i
         #     print(action)
         #     print("***************************************************")
@@ -111,7 +118,7 @@ def bfs_play(player):
     trash = USED_DECK.copy()
     # print(player[1].hand)
     A = BFS(player_bfs[2], player_bfs, farm, DECK_bfs, trash)
-    print(A)
+    # print(A)
     count = 0
     animal =""
     num = 0
@@ -136,7 +143,7 @@ def bfs_play(player):
                 num = 4
             else:
                 check_hand = i
-            check_action(action,animal,check_hand[num],i[num],i)
+            check_action(action,animal,check_hand[num],i[num],i,2)
             check_hand = i
         #     print(action)
         #     print("***************************************************")
@@ -202,6 +209,7 @@ class MyGame(arcade.Window):
 
         self.deck_list = arcade.SpriteList()
         self.deck = None
+
 
         self.hand_temp = [None,0]
         self.field_temp = None
@@ -385,7 +393,7 @@ class MyGame(arcade.Window):
         if self.no_card:
             self.text_no_card.draw()
 
-        if self.player_p == 1:
+        if self.player_p != 0:
             self.button2.draw()
             self.button2.pressed = False
 
@@ -409,6 +417,7 @@ class MyGame(arcade.Window):
         self.button2.check_mouse_press(x, y)
 
 
+    
 
     # def on_mouse_release(self, x, y, buttons, modifiers):
     #     self.button.check_mouse_release(x, y)
@@ -416,7 +425,7 @@ class MyGame(arcade.Window):
     def on_submit(self):
         self.start_sim = False
         if(self.hand_temp[1] == self.player_p and self.player_p != 0):
-            print(self.hand_temp[0],"player:",self.player_p)
+            # print(self.hand_temp[0],"player:",self.player_p)
             self.setup_used_deck()
             self.top_used_card_list.draw()
             HAND[self.player_p] = self.hand_temp[0]
@@ -463,7 +472,7 @@ class MyGame(arcade.Window):
         print("All action:",action)
         print("Command No:",self.command_no,"len action",len(action)-1)
         self.hand_temp = [HAND[self.player_p].copy(),self.player_p]
-        print("hand_temp player",self.player_p,self.hand_temp)
+        # print("hand_temp player",self.player_p,self.hand_temp)
         
         self.field_temp = {
             "S":self.animal_all_dict["S"].get_angle(),
@@ -474,10 +483,10 @@ class MyGame(arcade.Window):
         self.animal_center_temp = self.animal_position_dict
         self.start_sim = True
         print("Start sim",self.start_sim)
-        print("S angle:",self.field_temp["S"])
-        print("P angle:",self.field_temp["P"])
-        print("H angle:",self.field_temp["H"])
-        print("C angle:",self.field_temp["C"])
+        # print("S angle:",self.field_temp["S"])
+        # print("P angle:",self.field_temp["P"])
+        # print("H angle:",self.field_temp["H"])
+        # print("C angle:",self.field_temp["C"])
         # print(self.animal_center_temp)
         
             
@@ -485,32 +494,48 @@ class MyGame(arcade.Window):
         
         self.playing(action[self.command_no])
         time.sleep(1)
-        
-            
-    def playing(self, command):   
-        global player
+ #   ********************************************************* "PREPARE SEARCH" ********************************************************        
+    def prepare_search(self):
         global action
+        global player
 
+        for i in range(3):
+            player[i].hand = {
+                'S': HAND[i][0],
+                'P': HAND[i][1],
+                'H': HAND[i][2],
+                'C': HAND[i][3]
+            }
+            # player[i].field = 
+        
         if self.player_p==0:
             # prepare dls while player 0 is playing
             action = dls_play(player)
-            print(action)
+            print("Percept for player:",1,"Field",player[1].field,"Hand:",player[1].hand)
+            print("DLS:",action[0])
+        elif self.player_p == 1 and self.start_sim!=True:
+            # prepare bfs while player 1 (bot) is playing
+            print("Percept for player:",2,"Field",player[2].field,"Hand:",player[2].hand)
+            action = bfs_play(player)
+            print("BFS:",action[0])
+#   ********************************************************* "PLAYING" ******************************************************** 
+    def playing(self, command):   
+
+        if self.player_p==0:
             command = None
             command = self.key_player_0
             self.no_card = False
-        elif self.player_p == 1 and self.start_sim!=True:
-            # prepare bfs while player 1 (bot) is playing
-            action = bfs_play(player)
         else:
             self.command_no += 1
 
+        
         if command!=None:
             card = command[0]
             amount = command[1]
             draw_blind = command[2]
             draw = command[3]
             self.player_p = command[4]
-            print("Sim?:",self.start_sim,"hand card before",HAND[self.player_p])
+            # print("Sim?:",self.start_sim,"hand card before",HAND[self.player_p])
             """Called whenever a key is pressed. """
             # print(amount,card,"Player:",player)
             if (draw == True and len(USED_DECK) >= 1) and self.start_sim != True:
@@ -523,6 +548,7 @@ class MyGame(arcade.Window):
                 self.top_used_card_list.draw()
                 USED_DECK.pop()
                 print("Player:", self.player_p, " draw")
+                self.prepare_search()
                 # self.command_no += 1
             elif self.start_sim == True and (draw == True or draw_blind == True):
                 HAND[self.player_p][self.list_name.index(card)] += 1
@@ -542,6 +568,7 @@ class MyGame(arcade.Window):
                 self.deck_list.draw()
                 DECK.pop()
                 print("Player:", self.player_p, " draw blind")
+                self.prepare_search()
                 # self.command_no += 1
             elif HAND[self.player_p][self.list_name.index(card)] < amount:
                 # Check if card(s) in hand is suffiecient to play
@@ -562,6 +589,7 @@ class MyGame(arcade.Window):
                 if self.start_sim == True:
                     USED_DECK.pop()
                 print("Player:", self.player_p, " used ", card)
+                self.prepare_search()
                 # self.command_no += 1        
             elif amount == 2 and self.animal_position_dict[card] == 0:
                 # Move animal card for the first time
@@ -571,6 +599,8 @@ class MyGame(arcade.Window):
                 self.animal_all_dict[card].change_angle = -(ANGLE * (self.player_p+1))
                 self.animal_all_dict[card].update()
                 self.animal_position_dict[card] = 1
+                player[self.player_p].left.field +=  card  # update player field percept
+
                 HAND[self.player_p][self.list_name.index(card)] -= amount
                 for i in range(amount):
                     USED_DECK.append(card)  # Send used card to used Deck
@@ -582,13 +612,19 @@ class MyGame(arcade.Window):
                 self.setup_hand(HAND)
                 self.hand_list[self.player_p].draw()
                 # print("last used card:",USED_DECK[-1])
-                print("hand card after:",HAND[self.player_p])
+                # print("hand card after:",HAND[self.player_p])
+                self.prepare_search()
                 print("Player:", self.player_p, " move ", card)
                 # self.command_no += 1
             elif amount == 2 and self.animal_position_dict[card] == 1:
                 # Move animal card
                 self.animal_all_dict[card].change_angle = -ANGLE
                 self.animal_all_dict[card].update()
+                for i in range(3):
+                    if(player[i].field.find(card)!= -1):
+                        player[i].left.field += card
+                        player[i].field = player[i].field.replace(card,'')
+
                 HAND[self.player_p][self.list_name.index(card)] -= amount
                 for i in range(amount):
                     USED_DECK.append(card)  # Send used card to used Deck
@@ -600,7 +636,8 @@ class MyGame(arcade.Window):
                 self.setup_hand(HAND)
                 self.hand_list[self.player_p].draw()
                 # self.command_no += 1
-                print("hand card after:",HAND[self.player_p])
+                # print("hand card after:",HAND[self.player_p])
+                self.prepare_search()
                 print("Player:", self.player_p, " move ", card)
             else:
                 print("bug i sus")
