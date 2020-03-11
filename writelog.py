@@ -10,10 +10,12 @@ log = open(f'{log_path}/bfs-{ts}.txt', 'w', encoding='utf-8')
 
 
 def write_log(text):
-    global log
-    log.write(text + "\n")
+    pass
+    # global log
+    # log.write(text + "\n")
 
 
 def close_log():
-    global log
-    log.close()
+    pass
+    # global log
+    # log.close()
