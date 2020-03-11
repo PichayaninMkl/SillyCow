@@ -106,6 +106,7 @@ def dls_play(player):
         #     print(action)
         #     print("***************************************************")
         # print("old : ", check_hand)
+    print("DLS:",action)
     return action
 
 # ******************************************************************************************
@@ -148,6 +149,7 @@ def bfs_play(player):
         #     print(action)
         #     print("***************************************************")
         # print("old : ", check_hand)
+    print("BFS:",action)
     return action
 # ******************************************************************************************
 # print(bfs_play(player))
@@ -401,7 +403,7 @@ class MyGame(arcade.Window):
 
     def on_update(self, delta_time):
         if(self.start_sim and (self.command_no < len(action))):
-            print("Command No:",self.command_no,"len action",len(action)-1)
+            # print("Command No:",self.command_no,"len action",len(action)-1)
             self.simulatinng()
         elif (self.command_no == len(action) and len(action) != 0) and self.start_sim :
             self.command_no = 0
@@ -423,9 +425,7 @@ class MyGame(arcade.Window):
 
     # def on_mouse_release(self, x, y, buttons, modifiers):
     #     self.button.check_mouse_release(x, y)
-
-    def on_submit(self):
-        self.start_sim = False
+    def reset_sim(self):
         if(self.hand_temp[1] == self.player_p and self.player_p != 0):
             # print(self.hand_temp[0],"player:",self.player_p)
             self.setup_used_deck()
@@ -435,28 +435,30 @@ class MyGame(arcade.Window):
             counter = -3
             
             for animal in self.list_name:
+                
                 self.animal_all_dict[animal].angle = 0
-
-                if(self.field_temp[animal]==0):
-                    self.animal_all_dict[animal].remove_from_sprite_lists()
-
+                if(self.animal_center_temp[animal]==0):
+                    # print(animal,"was at a center")
                     self.center_all_dict[animal] = Card(
-                    self.animal_picture_center[animal], SPRITE_SCALING)
+                        self.animal_picture_center[animal], SPRITE_SCALING)
                     self.center_all_dict[animal].center_x = (
                         SCREEN_WIDTH/2) + (counter*50)
                     self.center_all_dict[animal].center_y = (SCREEN_HEIGHT/2)
                     self.card_list.append(self.center_all_dict[animal])
                     # self.card_list.draw()
+
+                    self.animal_all_dict[animal].remove_from_sprite_lists()
                     self.animal_all_dict[animal] = Card(
                         self.animal_picture_rotate[animal], SPRITE_SCALING)
                     self.animal_all_dict[animal].center_x = SCREEN_WIDTH * \
                         (0.4+(0.01*(counter+4)))
                 else:
+                    # print(animal,"was at ",self.field_temp[animal])
                     self.animal_all_dict[animal].change_angle = self.field_temp[animal]
                     # self.animal_all_dict[animal].angle = 0
                     self.animal_all_dict[animal].update()
                     for name in self.list_name:
-                        print(name,"angle:",self.field_temp[name])
+                        # print(name,"angle:",self.field_temp[name])
                         self.animal_all_dict[name].draw()
                 counter += 2
             
@@ -465,15 +467,22 @@ class MyGame(arcade.Window):
             self.setup_hand(HAND)
             self.hand_list[self.player_p].draw()
             self.card_list.draw()
-            self.playing(action[0])
-        elif self.player_p!=0:
+        else:
+            self.command_no = 0
+            pass
+
+    def on_submit(self):
+        self.start_sim = False
+        if self.player_p!=0:
+            self.reset_sim()
             self.playing(action[0])
         else:
             self.playing(None)
         
     def on_submit2(self):
-        print("All action:",action)
-        print("Command No:",self.command_no,"len action",len(action)-1)
+        self.reset_sim()
+        # print("All action:",action)
+        # print("Command No:",self.command_no,"len action",len(action)-1)
         self.hand_temp = [HAND[self.player_p].copy(),self.player_p]
         # print("hand_temp player",self.player_p,self.hand_temp)
         
@@ -483,14 +492,10 @@ class MyGame(arcade.Window):
             "H":self.animal_all_dict["H"].get_angle(),
             "C":self.animal_all_dict["C"].get_angle()
         }
-        self.animal_center_temp = self.animal_position_dict
+        self.animal_center_temp = self.animal_position_dict.copy()
         self.start_sim = True
-        print("Start sim",self.start_sim)
-        # print("S angle:",self.field_temp["S"])
-        # print("P angle:",self.field_temp["P"])
-        # print("H angle:",self.field_temp["H"])
-        # print("C angle:",self.field_temp["C"])
-        # print(self.animal_center_temp)
+        print("Start sim",self.start_sim,"animal center",self.animal_center_temp)
+        
         
             
     def simulatinng(self):
@@ -514,13 +519,12 @@ class MyGame(arcade.Window):
         if self.player_p==0:
             # prepare dls while player 0 is playing
             action = dls_play(player)
-            print("Percept for player:",1,"Field",player[1].field,"Hand:",player[1].hand)
-            print("DLS:",action)
+            # print("Percept for player:",1,"Field",player[1].field,"Hand:",player[1].hand)
         elif self.player_p == 1 and self.start_sim!=True:
             # prepare bfs while player 1 (bot) is playing
-            print("Percept for player:",2,"Field",player[2].field,"Hand:",player[2].hand)
+            # print("Percept for player:",2,"Field",player[2].field,"Hand:",player[2].hand)
             action = bfs_play(player)
-            print("BFS:",action)
+            # print("BFS:",action)
 #   ********************************************************* "PLAYING" ******************************************************** 
     def playing_draw(self, player):
         if len(DECK) >= 1:
@@ -635,7 +639,8 @@ class MyGame(arcade.Window):
                 self.animal_all_dict[card].change_angle = -(ANGLE * (self.player_p+1))
                 self.animal_all_dict[card].update()
                 self.animal_position_dict[card] = 1
-                player[self.player_p].left.field +=  card  # update player field percept
+                if self.start_sim!=True:
+                    player[self.player_p].left.field +=  card  # update player field percept
 
                 HAND[self.player_p][self.list_name.index(card)] -= amount
                 for i in range(amount):
@@ -657,7 +662,7 @@ class MyGame(arcade.Window):
                 self.animal_all_dict[card].change_angle = -ANGLE
                 self.animal_all_dict[card].update()
                 for i in range(3):
-                    if(player[i].field.find(card)!= -1):
+                    if(player[i].field.find(card)!= -1 and self.start_sim!=True):
                         print("Found",card,"on player",i,"field :",player[i].field)
                         player[i].left.field += card
                         player[i].field = player[i].field.replace(card,'')
