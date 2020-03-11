@@ -512,12 +512,12 @@ class MyGame(arcade.Window):
             # prepare dls while player 0 is playing
             action = dls_play(player)
             print("Percept for player:",1,"Field",player[1].field,"Hand:",player[1].hand)
-            print("DLS:",action[0])
+            print("DLS:",action)
         elif self.player_p == 1 and self.start_sim!=True:
             # prepare bfs while player 1 (bot) is playing
             print("Percept for player:",2,"Field",player[2].field,"Hand:",player[2].hand)
             action = bfs_play(player)
-            print("BFS:",action[0])
+            print("BFS:",action)
 #   ********************************************************* "PLAYING" ******************************************************** 
     def playing(self, command):   
 
@@ -622,8 +622,10 @@ class MyGame(arcade.Window):
                 self.animal_all_dict[card].update()
                 for i in range(3):
                     if(player[i].field.find(card)!= -1):
+                        print("Found",card,"on player",i,"field :",player[i].field)
                         player[i].left.field += card
                         player[i].field = player[i].field.replace(card,'')
+                        break
 
                 HAND[self.player_p][self.list_name.index(card)] -= amount
                 for i in range(amount):
