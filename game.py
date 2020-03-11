@@ -424,8 +424,9 @@ class MyGame(arcade.Window):
             counter = -3
             
             for animal in self.list_name:
-                self.animal_all_dict[animal].change_angle = self.field_temp[animal]
-                if(self.animal_position_dict[animal]==0):
+                self.animal_all_dict[animal].angle = 0
+
+                if(self.field_temp[animal]==0):
                     self.animal_all_dict[animal].remove_from_sprite_lists()
 
                     self.center_all_dict[animal] = Card(
@@ -435,21 +436,24 @@ class MyGame(arcade.Window):
                     self.center_all_dict[animal].center_y = (SCREEN_HEIGHT/2)
                     self.card_list.append(self.center_all_dict[animal])
                     # self.card_list.draw()
-                    self.animal_all_dict[name] = Card(
-                        self.animal_picture_rotate[name], SPRITE_SCALING)
-                    self.animal_all_dict[name].center_x = SCREEN_WIDTH * \
+                    self.animal_all_dict[animal] = Card(
+                        self.animal_picture_rotate[animal], SPRITE_SCALING)
+                    self.animal_all_dict[animal].center_x = SCREEN_WIDTH * \
                         (0.4+(0.01*(counter+4)))
                 else:
-                    self.animal_all_dict[animal].change_angle += self.field_temp[animal]
+                    self.animal_all_dict[animal].change_angle = self.field_temp[animal]
+                    # self.animal_all_dict[animal].angle = 0
                     self.animal_all_dict[animal].update()
                     for name in self.list_name:
+                        print(name,"angle:",self.field_temp[name])
                         self.animal_all_dict[name].draw()
-                counter = counter + 2
+                counter += 2
             
             self.hand_temp = None
             self.setup_hand(HAND)
             self.hand_list[self.player_p].draw()
-            # self.playing(action[0])
+            self.card_list.draw()
+            self.playing(action[0])
         elif self.player_p!=0:
             self.playing(action[0])
         else:
@@ -457,8 +461,10 @@ class MyGame(arcade.Window):
 
     def on_submit2(self):
         print("All action:",action)
+        print("Command No:",self.command_no,"len action",len(action)-1)
         self.hand_temp = [HAND[self.player_p].copy(),self.player_p]
         print("hand_temp player",self.player_p,self.hand_temp)
+        
         self.field_temp = {
             "S":self.animal_all_dict["S"].get_angle(),
             "P":self.animal_all_dict["P"].get_angle(),
@@ -466,32 +472,34 @@ class MyGame(arcade.Window):
             "C":self.animal_all_dict["C"].get_angle()
         }
         self.animal_center_temp = self.animal_position_dict
-        # print("S angle:",self.field_temp["S"])
-        # print("P angle:",self.field_temp["P"])
-        # print("H angle:",self.field_temp["H"])
-        # print("C angle:",self.field_temp["C"])
-        # print(self.animal_center_temp)
         self.start_sim = True
+        print("Start sim",self.start_sim)
+        print("S angle:",self.field_temp["S"])
+        print("P angle:",self.field_temp["P"])
+        print("H angle:",self.field_temp["H"])
+        print("C angle:",self.field_temp["C"])
+        # print(self.animal_center_temp)
+        
             
     def simulatinng(self):
+        
         self.playing(action[self.command_no])
         time.sleep(1)
         
             
-        
-    # def pause(self,2):
-    #     time.sleep(2)
-    #     return True
-
     def playing(self, command):   
         global player
         global action
+
         if self.player_p==0:
+            # prepare dls while player 0 is playing
             action = dls_play(player)
+            print(action)
             command = None
             command = self.key_player_0
             self.no_card = False
         elif self.player_p == 1 and self.start_sim!=True:
+            # prepare bfs while player 1 (bot) is playing
             action = bfs_play(player)
         else:
             self.command_no += 1

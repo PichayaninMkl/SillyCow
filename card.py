@@ -25,3 +25,6 @@ class Card(arcade.Sprite):
         # print(self.center_x, self.center_y)
         self.center_y = (SCREEN_HEIGHT / 2)
         self.center_x = x
+    
+    def get_angle(self):
+        return self.angle
