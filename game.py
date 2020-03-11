@@ -289,15 +289,17 @@ class MyGame(arcade.Window):
 
 
     def set_text(self):
-        self.text_player_0 = arcade.draw_text("C:Use 2 cow       \
-            H:Use 2 horse       \
-            P:Use 2 pig     \
-            S:Use 2 sheep       \
-            A:Use 1 pig       \
-            B:Use 1 sheep     \
-            C:Draw      \
-            D:Draw blind"\
-            , 100, 40, arcade.color.WHITE, 16)
+        self.text_player_0 = arcade.draw_text("C:Use 2 cow  \
+            H:Use 2 horse   \
+            P:Use 2 pig \
+            S:Use 2 sheep   \
+            L:Use 1 cow \
+            M:Use 1 horse   \
+            N:Use 1 pig \
+            O:Use 1 sheep   \
+            Z:Draw  \
+            X:Draw blind"\
+            , 20, 40, arcade.color.WHITE, 16)
         self.text_key_press = arcade.draw_text("------ Please Enter Key ------",0, 70, arcade.color.WHITE, 18, width=SCREEN_WIDTH, align="center")
         self.text_no_card = arcade.draw_text("Cannot play. Not enough card!!!",0, 10, arcade.color.RED, 22, width=SCREEN_WIDTH, align="center")
 
@@ -519,6 +521,20 @@ class MyGame(arcade.Window):
             action = bfs_play(player)
             print("BFS:",action)
 #   ********************************************************* "PLAYING" ******************************************************** 
+    def playing_draw(self, player):
+        if len(DECK) >= 1:
+            # Draw used card
+            HAND[player][self.list_name.index(DECK[-1])] += 1
+            self.clear_hand()
+            self.setup_hand(HAND)
+            self.hand_list[player].draw()
+            self.setup_deck()
+            self.deck_list.draw()
+            DECK.pop()
+            print("Player:", player, " draw blind")
+            
+        return True
+
     def playing(self, command):   
 
         if self.player_p==0:
@@ -528,7 +544,6 @@ class MyGame(arcade.Window):
         else:
             self.command_no += 1
 
-        
         if command!=None:
             card = command[0]
             amount = command[1]
@@ -575,7 +590,7 @@ class MyGame(arcade.Window):
                 print("Player:", self.player_p, " cannot play.Not enough card")
                 if self.player_p == 0:
                     self.no_card = True
-                    self.key_player_0 = None
+                    self.key_player_0 = None 
             elif amount == 1:
                 HAND[self.player_p][self.list_name.index(card)] -= amount
                 USED_DECK.append(card)
@@ -583,12 +598,32 @@ class MyGame(arcade.Window):
                 self.setup_hand(HAND)
                 self.hand_list[self.player_p].draw()
                 # print("last used card:",USED_DECK[-1])
-                
                 self.setup_used_deck()
                 self.top_used_card_list.draw()
+                print("Player:", self.player_p, " used ", card)
                 if self.start_sim == True:
                     USED_DECK.pop()
-                print("Player:", self.player_p, " used ", card)
+                else:
+                    # check card
+                    if card == "H":
+                        #right hand
+                        if self.player_p < 0:
+                            p = self.player_p - 1
+                        else:
+                            p = 2
+                        self.playing_draw(p)
+                    elif card == "C":
+                        player_n = [0,1,2]
+                        for i in range(len(player_n)):
+                            if player_n[i] != self.player_p:
+                                self.playing_draw(player_n[i])
+                    elif card == "P":
+                        #left hand
+                        if self.player_p < 2:
+                            p = self.player_p + 1
+                        else:
+                            p = 0
+                        self.playing_draw(p)
                 self.prepare_search()
                 # self.command_no += 1        
             elif amount == 2 and self.animal_position_dict[card] == 0:
@@ -664,13 +699,17 @@ class MyGame(arcade.Window):
             self.key_player_0 = ["P", 2, False, False, 0]
         elif key == arcade.key.S:
             self.key_player_0 = ["S", 2, False, False, 0]
-        elif key == arcade.key.A:
+        elif key == arcade.key.L:
+            self.key_player_0 = ["C", 1, False, False, 0]
+        elif key == arcade.key.M:
+            self.key_player_0 = ["H", 1, False, False, 0]
+        elif key == arcade.key.N:
             self.key_player_0 = ["P", 1, False, False, 0]
-        elif key == arcade.key.B:
+        elif key == arcade.key.O:
             self.key_player_0 = ["S", 1, False, False, 0]
-        elif key == arcade.key.C:
+        elif key == arcade.key.Z:
             self.key_player_0 = [None, 0, False, True, 0]
-        elif key == arcade.key.D:
+        elif key == arcade.key.X:
             self.key_player_0 = [None, 0, True, False, 0]
 
         return True       
