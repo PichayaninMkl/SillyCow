@@ -377,6 +377,7 @@ def dls(p:Players, percept_player:List[Players], percept_deck:List, percept_tras
         sol = tuple(solution.items())[0][0]
 
     logging(f'\nSelect solution {sol}')
+    print(f'\nElapsed time = {elapsed} seconds\nCreated node = {node_id} nodes')                
     logging(f'\nElapsed time = {elapsed} seconds\nCreated node = {node_id} nodes')                
     log.close()
     return sol
