@@ -403,7 +403,7 @@ class MyGame(arcade.Window):
         if(self.start_sim and (self.command_no < len(action))):
             print("Command No:",self.command_no,"len action",len(action)-1)
             self.simulatinng()
-        elif self.command_no == len(action) and len(action) != 0:
+        elif (self.command_no == len(action) and len(action) != 0) and self.start_sim :
             self.command_no = 0
             self.start_sim = False
             print("done simulating")
@@ -460,7 +460,8 @@ class MyGame(arcade.Window):
                         self.animal_all_dict[name].draw()
                 counter += 2
             
-            self.hand_temp = None
+            self.hand_temp = [None,0]
+            self.command_no = 0
             self.setup_hand(HAND)
             self.hand_list[self.player_p].draw()
             self.card_list.draw()
@@ -469,7 +470,7 @@ class MyGame(arcade.Window):
             self.playing(action[0])
         else:
             self.playing(None)
-
+        
     def on_submit2(self):
         print("All action:",action)
         print("Command No:",self.command_no,"len action",len(action)-1)
