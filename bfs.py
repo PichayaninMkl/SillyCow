@@ -372,6 +372,8 @@ def searching(player_root, field_root):
 
 # def BFS(player,player_list, farm, deck, trash):
 def BFS(player, player_list, farm, deck, trash):
+    print("Percept from BFS(player 2)","Field",player.field,"Hand:",player.hand)
+
     start_time = time.time()
     # psutil.cpu_percent()
     # psutil.virtual_memory()
