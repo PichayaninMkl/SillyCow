@@ -36,8 +36,33 @@ draw_src = 0 # 0 = trash, 1 = deck
 draw_history = []
 run_history = []
 
-depth_limit = 8
+depth_limit = 10
 depth = -1
+
+def init_global_var():
+    global dot, parent_node, previous_node, action_label, log, \
+            player, deck, trash, farm, solution, \
+            action_stack, visited_state, node_id, draw_src, draw_history, \
+            run_history, depth_limit, depth
+
+    dot = Digraph(comment='Agent Decision')
+    parent_node = None
+    previous_node = None
+    action_label = ''
+    log = None
+    player = None
+    deck = None
+    trash = None
+    farm = ''
+    solution = {}
+    action_stack = []
+    visited_state = []
+    node_id = 0
+    draw_src = 0
+    draw_history = []
+    run_history = []
+    depth_limit = 10
+    depth = -1
 
 def play(p:Players):
     global depth
@@ -53,7 +78,7 @@ def play(p:Players):
     depth += 1
     state = (p.field, p.hand['S'], p.hand['P'], p.hand['H'], p.hand['C'])
     action_stack.append(tuple(list(state) + [draw_src]))
-    draw_src = 0 # Reset to default
+    draw_src = 0
     current_node = f'Node{node_id}'
     node_id += 1
     
@@ -129,9 +154,11 @@ def play(p:Players):
             # simulative draw
             action_label = f'draw Deck "{ctype}"'
             logging(f'>> Play draw "{ctype}" from Deck')
+            draw_src = 1
             draw_deck(p, ctype, 'f')
             play(p)
             draw_deck(p, ctype, 'r')
+            draw_src = 0
             logging(f'\n<<< Backtracked <{state}> at depth ({depth}/{depth_limit}) >>>')
     
     parent_node = previous_node
@@ -237,13 +264,11 @@ def card_operation(ctype: chr, p:Players, flow:str):
 
 def draw_deck(p:Players, ctype:str, flow:str):
     global deck
-    global draw_src
     global draw_history
                   
     if flow == 'f':
         draw_history.append({'ctype':deck.pop(), 'src':deck}) # don't care the card, draw for deck out checking
         p.hand[ctype] += 1
-        draw_src = 1
         logging(f'>F draw "{ctype}" from Deck')
     elif flow == 'r':
         card = draw_history.pop()
@@ -253,14 +278,12 @@ def draw_deck(p:Players, ctype:str, flow:str):
     
 def draw_trash(p:Players, flow:str):
     global trash
-    global draw_src
     global draw_history
     
     if flow == 'f':
         draw_history.append({'ctype':trash.pop(), 'src':trash})
         card = draw_history[-1]
         p.hand[card['ctype']] += 1
-        draw_src = 0
         logging(f'>F draw \"{card["ctype"]}\" from Trash\n\t {trash}')
     elif flow == 'r':
         card = draw_history.pop()
@@ -319,7 +342,9 @@ def dls(p:Players, percept_player:List[Players], percept_deck:List, percept_tras
     global farm
     global solution
     global log
-    print("Percept from dls(player 1)","Field",p.field,"Hand:",p.hand)
+
+    init_global_var()
+                
     player = percept_player
     deck = percept_deck
     trash = percept_trash
@@ -340,10 +365,8 @@ def dls(p:Players, percept_player:List[Players], percept_deck:List, percept_tras
 
     elapsed = datetime.now().timestamp() - start.timestamp()
     dot.save(f'graphviz/dls-{ts}.gv') # Save graph
-    
-    # Return solution
-    print(f'\nElapsed time = {elapsed} seconds\nCreated node = {node_id} nodes')
-    logging(f'\nElapsed time = {elapsed} seconds\nCreated node = {node_id} nodes')
+
+    # Select solution
     if not solution:
         logging(f'\nHave no Solution')
         sol = ()
@@ -352,6 +375,8 @@ def dls(p:Players, percept_player:List[Players], percept_deck:List, percept_tras
         for sol, cost in solution.items():
             logging(f'\nSolution {sol}\nCost = {cost}')
         sol = tuple(solution.items())[0][0]
-    
+
+    logging(f'\nSelect solution {sol}')
+    logging(f'\nElapsed time = {elapsed} seconds\nCreated node = {node_id} nodes')                
     log.close()
     return sol
