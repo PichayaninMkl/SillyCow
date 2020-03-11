@@ -23,8 +23,8 @@ class Card(arcade.Sprite):
 
     def set_pos(self, x, y):
         # print(self.center_x, self.center_y)
-        self.center_y = (SCREEN_HEIGHT / 2)
-        self.center_x = x
+        self.center_y = (SCREEN_HEIGHT / 2)+50
+        self.center_x = x + 70
     
     def get_angle(self):
         return self.angle

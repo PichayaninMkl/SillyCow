@@ -149,7 +149,7 @@ def bfs_play(player):
         #     print(action)
         #     print("***************************************************")
         # print("old : ", check_hand)
-    print("BFS:",action)
+    print("BFS:",action)    
     return action
 # ******************************************************************************************
 # print(bfs_play(player))
@@ -211,7 +211,9 @@ class MyGame(arcade.Window):
 
         self.deck_list = arcade.SpriteList()
         self.deck = None
-
+        self.deck_text = None
+        self.trash_text = None
+        self.mat = None
 
         self.hand_temp = [None,0]
         self.field_temp = None
@@ -289,8 +291,14 @@ class MyGame(arcade.Window):
         self.button = PlayTextButton(150, 150,self.on_submit, text = "Play")
         self.button2 = PlayTextButton(150, 50,self.on_submit2, text = sim_name)
 
+    def set_decktrash_text(self):
+        self.deck_text = arcade.draw_text("Deck",380,(SCREEN_HEIGHT/2)+20,arcade.color.WHITE,16)
+        self.trash_text = arcade.draw_text("Trash",1180,(SCREEN_HEIGHT/2)+20,arcade.color.WHITE,16)
+        
+
 
     def set_text(self):
+        
         self.text_player_0 = arcade.draw_text("C:Use 2 cow  \
             H:Use 2 horse   \
             P:Use 2 pig \
@@ -372,7 +380,9 @@ class MyGame(arcade.Window):
 
         # This command has to happen before we start drawing
         arcade.start_render()
-
+        arcade.draw_rectangle_filled((SCREEN_WIDTH/2),(SCREEN_HEIGHT/2),700,500,arcade.color.REDWOOD)
+        self.deck_text.draw()
+        self.trash_text.draw()
         # Draw all card at center.
         self.card_list.draw()
         for player in range(3):
@@ -387,6 +397,7 @@ class MyGame(arcade.Window):
         # self.button.draw()
 
         if self.player_p == 0:
+            
             self.text_key_press.draw()
             self.text_player_0.draw()
 
@@ -730,10 +741,13 @@ def main():
     window = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
     window.set_buttons()
     window.set_text()
+    window.set_decktrash_text()
     window.setup_used_deck()
     window.setup_deck()
     window.setup_hand(HAND)
     window.setup_all_animal()
+    
+
     arcade.run()
 
 
