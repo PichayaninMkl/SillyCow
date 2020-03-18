@@ -350,6 +350,8 @@ def dls(p:Players, percept_player:List[Players], percept_deck:List, percept_tras
     trash = percept_trash
     farm = percept_farm
     
+    print("Percept from DLS(player 1)","Field",p.field,"Hand:",p.hand)
+
     # Time measuring
     start = datetime.now()
     ts = str(start)[:-7].replace(':', '-').replace(' ', '_')

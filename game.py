@@ -529,11 +529,13 @@ class MyGame(arcade.Window):
         
         if self.player_p==0:
             # prepare dls while player 0 is playing
+            print("player 1 field(DLS)",player[1].field)
             action = dls_play(player)
+
             # print("Percept for player:",1,"Field",player[1].field,"Hand:",player[1].hand)
         elif self.player_p == 1 and self.start_sim!=True:
+            print("player 2 field(BFS)",player[2].field)
             # prepare bfs while player 1 (bot) is playing
-            # print("Percept for player:",2,"Field",player[2].field,"Hand:",player[2].hand)
             action = bfs_play(player)
             # print("BFS:",action)
 #   ********************************************************* "PLAYING" ******************************************************** 
@@ -552,6 +554,8 @@ class MyGame(arcade.Window):
         return True
 
     def playing(self, command):   
+        global player
+        global farm
 
         if self.player_p==0:
             command = None
@@ -652,6 +656,7 @@ class MyGame(arcade.Window):
                 self.animal_position_dict[card] = 1
                 if self.start_sim!=True:
                     player[self.player_p].left.field +=  card  # update player field percept
+                    farm.replace(card,'')
 
                 HAND[self.player_p][self.list_name.index(card)] -= amount
                 for i in range(amount):
@@ -677,6 +682,7 @@ class MyGame(arcade.Window):
                         print("Found",card,"on player",i,"field :",player[i].field)
                         player[i].left.field += card
                         player[i].field = player[i].field.replace(card,'')
+                        
                         break
 
                 HAND[self.player_p][self.list_name.index(card)] -= amount
@@ -689,9 +695,9 @@ class MyGame(arcade.Window):
                 self.clear_hand()
                 self.setup_hand(HAND)
                 self.hand_list[self.player_p].draw()
+                self.prepare_search()
                 # self.command_no += 1
                 # print("hand card after:",HAND[self.player_p])
-                self.prepare_search()
                 print("Player:", self.player_p, " move ", card)
             else:
                 print("bug i sus")
