@@ -8,6 +8,7 @@ from button import TextButton
 import sillycowInit as sillycow
 from sillycow_dls import dls
 from bfs import BFS
+from copy import deepcopy
 
 
 def converter(hand):
@@ -35,6 +36,7 @@ DECK = sillycow.create_deck()
 farm = 'SPHC'
 n_player = 3
 player = sillycow.create_player(3, DECK)
+player_temp = None
 # player[0].left = player[1]
 # player[1].left = player[2]
 # player[1].left = player[0]
@@ -71,7 +73,7 @@ def check_action(action: list, animal: str, old, new,hand_now,player : int):
 
 def dls_play(player):
     action=[]
-    player_dls = player.copy()
+    player_dls = deepcopy(player) 
     DECK_dls = DECK.copy()
     trash = USED_DECK.copy()
     # print(player[1].hand)
@@ -107,7 +109,6 @@ def dls_play(player):
         #     print("***************************************************")
         # print("old : ", check_hand)
     print("DLS:",action)
-    print("Percept of bfs After AI(DLS)",player[2].field)
     return action
 
 # ******************************************************************************************
@@ -521,7 +522,8 @@ class MyGame(arcade.Window):
     def prepare_search(self):
         global action
         global player
-
+        # global player_temp
+        # player_temp = player
         for i in range(3):
             player[i].hand = {
                 'S': HAND[i][0],
@@ -533,13 +535,9 @@ class MyGame(arcade.Window):
         
         if self.player_p==0:
             # prepare dls while player 0 is playing
-            # print("player 1 field(DLS)",player[1].field)
-            print("Percept of bfs before dls are",player[2].field)
             action = dls_play(player)
-
-            # print("Percept for player:",1,"Field",player[1].field,"Hand:",player[1].hand)
+            # player = player_temp
         elif self.player_p == 1 and self.start_sim!=True:
-            # print("player 2 field(BFS)",player[2].field)
             # prepare bfs while player 1 (bot) is playing
             action = bfs_play(player)
             # print("BFS:",action)
