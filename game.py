@@ -107,6 +107,7 @@ def dls_play(player):
         #     print("***************************************************")
         # print("old : ", check_hand)
     print("DLS:",action)
+    print("Percept of bfs After AI(DLS)",player[2].field)
     return action
 
 # ******************************************************************************************
@@ -484,6 +485,9 @@ class MyGame(arcade.Window):
 
     def on_submit(self):
         self.start_sim = False
+        # print("Before moving card. Percept of player: 0 is",player[0].field)
+        # print("Before moving card. Percept of player: 1 is",player[1].field)
+        # print("Before moving card. Percept of player: 2 is",player[2].field)
         if self.player_p!=0:
             self.reset_sim()
             self.playing(action[0])
@@ -529,12 +533,13 @@ class MyGame(arcade.Window):
         
         if self.player_p==0:
             # prepare dls while player 0 is playing
-            print("player 1 field(DLS)",player[1].field)
+            # print("player 1 field(DLS)",player[1].field)
+            print("Percept of bfs before dls are",player[2].field)
             action = dls_play(player)
 
             # print("Percept for player:",1,"Field",player[1].field,"Hand:",player[1].hand)
         elif self.player_p == 1 and self.start_sim!=True:
-            print("player 2 field(BFS)",player[2].field)
+            # print("player 2 field(BFS)",player[2].field)
             # prepare bfs while player 1 (bot) is playing
             action = bfs_play(player)
             # print("BFS:",action)
@@ -648,6 +653,7 @@ class MyGame(arcade.Window):
                 # self.command_no += 1        
             elif amount == 2 and self.animal_position_dict[card] == 0:
                 # Move animal card for the first time
+                print("First move of",card)
                 self.center_all_dict[card].remove_from_sprite_lists()
                 self.animal_all_dict[card].set_pos(
                     self.animal_all_dict[card].center_x, self.animal_all_dict[card].center_y)
@@ -670,10 +676,14 @@ class MyGame(arcade.Window):
                 self.hand_list[self.player_p].draw()
                 # print("last used card:",USED_DECK[-1])
                 # print("hand card after:",HAND[self.player_p])
+                print("After moving card. Percept of player: 0 is",player[0].field)
+                print("After moving card. Percept of player: 1 is",player[1].field)
+                print("After moving card. Percept of player: 2 is",player[2].field)
                 self.prepare_search()
                 print("Player:", self.player_p, " move ", card)
                 # self.command_no += 1
             elif amount == 2 and self.animal_position_dict[card] == 1:
+                print("Not first move of",card)
                 # Move animal card
                 self.animal_all_dict[card].change_angle = -ANGLE
                 self.animal_all_dict[card].update()
@@ -682,7 +692,9 @@ class MyGame(arcade.Window):
                         print("Found",card,"on player",i,"field :",player[i].field)
                         player[i].left.field += card
                         player[i].field = player[i].field.replace(card,'')
-                        
+                        print("After moving card. Percept of player: 0 is",player[0].field)
+                        print("After moving card. Percept of player: 1 is",player[1].field)
+                        print("After moving card. Percept of player: 2 is",player[2].field)
                         break
 
                 HAND[self.player_p][self.list_name.index(card)] -= amount
