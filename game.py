@@ -294,8 +294,8 @@ class MyGame(arcade.Window):
         self.button2 = PlayTextButton(150, 50,self.on_submit2, text = sim_name)
 
     def set_decktrash_text(self):
-        self.deck_text = arcade.draw_text("Deck",380,(SCREEN_HEIGHT/2)+20,arcade.color.WHITE,16)
-        self.trash_text = arcade.draw_text("Trash",1180,(SCREEN_HEIGHT/2)+20,arcade.color.WHITE,16)
+        self.deck_text = arcade.draw_text("Deck",580,(SCREEN_HEIGHT/2)+270,arcade.color.WHITE,16)
+        self.trash_text = arcade.draw_text("Trash",980,(SCREEN_HEIGHT/2)+270,arcade.color.WHITE,16)
         
 
 
@@ -359,8 +359,8 @@ class MyGame(arcade.Window):
 
     def setup_deck(self):
         self.deck = Card(self.animal_picture_center[DECK[-1]], SPRITE_SCALING)
-        self.deck.center_x = 400
-        self.deck.center_y = (SCREEN_HEIGHT/2)+100
+        self.deck.center_x = 600
+        self.deck.center_y = (SCREEN_HEIGHT/2)+350
         self.deck_list.append(self.deck)
 
     def setup_used_deck(self):
@@ -369,8 +369,8 @@ class MyGame(arcade.Window):
             # print("have use card:",USED_DECK[-1])
             self.top_used_card = Card(
                 self.animal_picture_center[USED_DECK[-1]], SPRITE_SCALING)
-            self.top_used_card.center_x = 1200
-            self.top_used_card.center_y = (SCREEN_HEIGHT/2)+100
+            self.top_used_card.center_x = 1000
+            self.top_used_card.center_y = (SCREEN_HEIGHT/2)+350
             self.top_used_card_list.append(self.top_used_card)
         else:
             print("don't have use card")
