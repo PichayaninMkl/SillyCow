@@ -35,6 +35,8 @@ USED_DECK = []
 DECK = sillycow.create_deck()
 farm = 'SPHC'
 n_player = 3
+ended = 1
+
 player = sillycow.create_player(3, DECK)
 player_temp = None
 # player[0].left = player[1]
@@ -248,6 +250,8 @@ class MyGame(arcade.Window):
         self.pig_position = 0
         self.sheep_position = 0
 
+        self.end_text = None
+
         # for easy access, use dictionary
         self.center_all_dict = {
             "C": self.cow_center,
@@ -296,7 +300,9 @@ class MyGame(arcade.Window):
     def set_decktrash_text(self):
         self.deck_text = arcade.draw_text("Deck",580,(SCREEN_HEIGHT/2)+270,arcade.color.WHITE,16)
         self.trash_text = arcade.draw_text("Trash",980,(SCREEN_HEIGHT/2)+270,arcade.color.WHITE,16)
-        
+
+    def set_end_text(self):
+        self.end_text = arcade.draw_text("It's end",(SCREEN_HEIGHT/2),(SCREEN_HEIGHT/2),arcade.color.WHITE,30)
 
 
     def set_text(self):
@@ -379,7 +385,8 @@ class MyGame(arcade.Window):
         """
         Render the screen.
         """
-
+        global player
+        global ended
         # This command has to happen before we start drawing
         arcade.start_render()
         arcade.draw_rectangle_filled((SCREEN_WIDTH/2),(SCREEN_HEIGHT/2),700,500,arcade.color.REDWOOD)
@@ -387,8 +394,9 @@ class MyGame(arcade.Window):
         self.trash_text.draw()
         # Draw all card at center.
         self.card_list.draw()
-        for player in range(3):
-            self.hand_list[player].draw()
+        for player_p in range(3):
+            self.hand_list[player_p].draw()
+        # self.end_text.draw()
         # self.hand_list1.draw()
         # self.hand_list2.draw()
 
@@ -414,7 +422,21 @@ class MyGame(arcade.Window):
             self.button2.draw()
             self.button2.pressed = False
 
+        hand_count0 = player[0].hand["S"]+player[0].hand["P"]+player[0].hand["H"]+player[0].hand["C"]
+        hand_count1 = player[1].hand["S"]+player[1].hand["P"]+player[1].hand["H"]+player[1].hand["C"]
+        hand_count2 = player[2].hand["S"]+player[2].hand["P"]+player[2].hand["H"]+player[2].hand["C"]
+        if (hand_count0*hand_count1*hand_count2 == 0) and ended:
+            print("EnDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD",hand_count0*hand_count1*hand_count2)
+            ended = 0
+            self.end_text.draw() 
+        if ended == 0:
+            self.end_text.draw() 
+        # else:
+        #     print("Not end",hand_count0*hand_count1*hand_count2)
+
     def on_update(self, delta_time):
+        global player
+
         if(self.start_sim and (self.command_no < len(action))):
             # print("Command No:",self.command_no,"len action",len(action)-1)
             self.simulatinng()
@@ -422,6 +444,8 @@ class MyGame(arcade.Window):
             self.command_no = 0
             self.start_sim = False
             print("done simulating")
+        
+        
         """ Movement and game logic """
 
         # Call update on all sprites (The sprites don't do much in this
@@ -555,6 +579,18 @@ class MyGame(arcade.Window):
             print("Player:", player, " draw blind")
             
         return True
+
+    def check_end(self):
+        global player
+        hand_count0 = player[0].hand["S"]+player[0].hand["P"]+player[0].hand["H"]+player[0].hand["C"]
+        hand_count1 = player[1].hand["S"]+player[1].hand["P"]+player[1].hand["H"]+player[1].hand["C"]
+        hand_count2 = player[2].hand["S"]+player[2].hand["P"]+player[2].hand["H"]+player[2].hand["C"]
+        
+        if hand_count0*hand_count1*hand_count2 == 0:
+            print("EnDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD",hand_count0*hand_count1*hand_count2)
+            self.end_text.draw() 
+        else:
+            print("Not end",hand_count0*hand_count1*hand_count2)
 
     def playing(self, command):   
         global player
@@ -712,6 +748,8 @@ class MyGame(arcade.Window):
             else:
                 print("bug i sus")
 
+            # self.check_end()            
+
             if not self.no_card and self.start_sim!=True:
                 if self.player_p!=2:
                     self.player_p += 1
@@ -757,6 +795,7 @@ def main():
     window = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
     window.set_buttons()
     window.set_text()
+    window.set_end_text()
     window.set_decktrash_text()
     window.setup_used_deck()
     window.setup_deck()
