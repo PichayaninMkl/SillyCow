@@ -36,6 +36,8 @@ DECK = sillycow.create_deck()
 farm = 'SPHC'
 n_player = 3
 ended = 1
+known_hand = {'L':{'S':0, 'P':0, 'H':0, 'C':0}, 'R':{'S':0, 'P':0, 'H':0, 'C':0}}
+
 
 player = sillycow.create_player(3, DECK)
 player_temp = None
@@ -595,6 +597,7 @@ class MyGame(arcade.Window):
     def playing(self, command):   
         global player
         global farm
+        global known_hand
 
         if self.player_p==0:
             command = None
@@ -622,6 +625,11 @@ class MyGame(arcade.Window):
                 self.top_used_card_list.draw()
                 USED_DECK.pop()
                 print("Player:", self.player_p, " draw")
+                if self.player_p == 1:
+                    known_hand["L"][self.list_name.index(USED_DECK[-1])] +=1
+                elif self.player_p == 2:
+                    known_hand["R"][self.list_name.index(USED_DECK[-1])] +=1
+
                 self.prepare_search()
                 # self.command_no += 1
             elif self.start_sim == True and (draw == True or draw_blind == True):
@@ -659,6 +667,13 @@ class MyGame(arcade.Window):
                 # print("last used card:",USED_DECK[-1])
                 self.setup_used_deck()
                 self.top_used_card_list.draw()
+                
+                # update know hand when used
+                if self.player_p == 1 & known_hand["L"][card] >=1:
+                    known_hand["L"][card] -=1
+                elif self.player_p == 2 & known_hand["R"][card] >=1 :
+                    known_hand["R"][card] -=1
+
                 print("Player:", self.player_p, " used ", card)
                 if self.start_sim == True:
                     USED_DECK.pop()
@@ -708,6 +723,18 @@ class MyGame(arcade.Window):
                 self.clear_hand()
                 self.setup_hand(HAND)
                 self.hand_list[self.player_p].draw()
+
+
+                # update known hand
+                if self.player_p == 1 & known_hand["L"][card] >=2:
+                    known_hand["L"][card] -=2
+                elif self.player_p == 2 & known_hand["R"][card] >=2 :
+                    known_hand["R"][card] -=2
+                elif self.player_p == 1 & known_hand["L"][card] >=1 :
+                    known_hand["L"][card] -=1
+                elif self.player_p == 2 & known_hand["R"][card] >=1 :
+                    known_hand["R"][card] -=1
+                
                 # print("last used card:",USED_DECK[-1])
                 # print("hand card after:",HAND[self.player_p])
                 print("After moving card. Percept of player: 0 is",player[0].field)
@@ -730,6 +757,16 @@ class MyGame(arcade.Window):
                         print("After moving card. Percept of player: 1 is",player[1].field)
                         print("After moving card. Percept of player: 2 is",player[2].field)
                         break
+
+                # update known hand
+                if self.player_p == 1 & known_hand["L"][card] >=2:
+                    known_hand["L"][card] -=2
+                elif self.player_p == 2 & known_hand["R"][card] >=2 :
+                    known_hand["R"][card] -=2
+                elif self.player_p == 1 & known_hand["L"][card] >=1 :
+                    known_hand["L"][card] -=1
+                elif self.player_p == 2 & known_hand["R"][card] >=1 :
+                    known_hand["R"][card] -=1
 
                 HAND[self.player_p][self.list_name.index(card)] -= amount
                 for i in range(amount):
