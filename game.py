@@ -6,6 +6,7 @@ import asyncio
 from card import Card
 from button import TextButton
 import sillycowInit as sillycow
+from sillycow_astar import astar
 from sillycow_dls import dls
 from bfs import BFS
 from copy import deepcopy
@@ -158,6 +159,52 @@ def bfs_play(player):
     print("BFS:",action)    
     return action
 # ******************************************************************************************
+
+# *************************************** Ai action astar ************************************
+def astar_play(player):
+    action=[]
+    player_astar = deepcopy(player) 
+    DECK_astar = DECK.copy()
+    trash = USED_DECK.copy()
+    print(player_astar[1].hand)
+    A = astar(player_astar[1],player_astar,DECK_astar,trash,farm,known_hand)
+    print(A)
+    count = 0
+    animal =""
+    num = 0
+    for i in A:
+        # print("hand : ", i)
+        if count == 0:
+            check_hand = i
+            count += 1
+            # print("***************************************************")        
+        else:
+            if check_hand[1] != i[1]:
+                animal = "S"
+                num = 1
+            elif check_hand[2] != i[2]:
+                animal = "P"
+                num = 2
+            elif check_hand[3] != i[3]:
+                animal = "H"
+                num = 3
+            elif check_hand[4] != i[4]:
+                animal = "C"
+                num = 4
+            else:
+                check_hand = i
+            check_action(action,animal,check_hand[num],i[num],i,1)
+            check_hand = i
+        #     print(action)
+        #     print("***************************************************")
+        # print("old : ", check_hand)
+    print("astar :",action)
+    return action
+
+# ******************************************************************************************
+
+astar_bot = astar_play(player)
+
 # print(bfs_play(player))
 # COMMAND = [["H", 2, False, False, 0],
 #            [None, 0, False, True, 1],
