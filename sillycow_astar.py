@@ -434,6 +434,10 @@ def astar(p:Players, percept_player:List[Players], percept_deck:List, percept_tr
     farm = percept_farm
     known_hand = percept_known_hand
     
+    print("Know:",known_hand)
+    print("hand:",p.hand)
+    print("farm:",percept_farm)
+    print("field:",p.field)
     # Time measuring
     start = datetime.now()
     ts = str(start)[:-7].replace(':', '-').replace(' ', '_')
@@ -463,4 +467,5 @@ def astar(p:Players, percept_player:List[Players], percept_deck:List, percept_tr
     logging(f'\nSelect solution {sol}')
     logging(f'\nElapsed time = {elapsed} seconds\nMax Depth = {max_depth+1} levels (0 - {max_depth})') # Depth include root
     log.close()
+    print("Solution!", sol)
     return sol

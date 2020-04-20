@@ -166,7 +166,7 @@ def astar_play(player):
     player_astar = deepcopy(player) 
     DECK_astar = DECK.copy()
     trash = USED_DECK.copy()
-    print(player_astar[1].hand)
+    print("Astar_hand",player_astar[1].hand)
     A = astar(player_astar[1],player_astar,DECK_astar,trash,farm,known_hand)
     print(A)
     count = 0
@@ -203,7 +203,7 @@ def astar_play(player):
 
 # ******************************************************************************************
 
-astar_bot = astar_play(player)
+# astar_bot = astar_play(player)
 
 # print(bfs_play(player))
 # COMMAND = [["H", 2, False, False, 0],
@@ -608,11 +608,13 @@ class MyGame(arcade.Window):
         
         if self.player_p==0:
             # prepare dls while player 0 is playing
-            action = dls_play(player)
+            action = astar_play(player)
+
             # player = player_temp
         elif self.player_p == 1 and self.start_sim!=True:
             # prepare bfs while player 1 (bot) is playing
             action = bfs_play(player)
+
             # print("BFS:",action)
 #   ********************************************************* "PLAYING" ******************************************************** 
     def playing_draw(self, player):
