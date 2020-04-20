@@ -405,7 +405,7 @@ def logging(text:str, end:str = '\n'):
                 
 # -------------------------------------- Control --------------------------------------
 def init_global_var():
-    global log, solution_list, draw_src, max_depth, draw_history, run_history, depth_limit, depth, explored_state
+    global log, solution_list, draw_src, max_depth, draw_history, run_history, depth_limit, depth, explored_state, frontier
                   
     log = None
     solution_list = {}
@@ -416,6 +416,7 @@ def init_global_var():
     depth = 0
     depth_limit = 10
     explored_state = []
+    frontier = []
 
 def astar(p:Players, percept_player:List[Players], percept_deck:List, percept_trash:List,
           percept_farm:str, percept_known_hand:Dict[str,Dict]) -> Tuple[Tuple]:

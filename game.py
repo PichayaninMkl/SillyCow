@@ -163,7 +163,7 @@ def bfs_play(player):
 # *************************************** Ai action astar ************************************
 def astar_play(player):
     action=[]
-    player_astar = deepcopy(player) 
+    player_astar = player.copy()
     DECK_astar = DECK.copy()
     trash = USED_DECK.copy()
     print("Astar_hand",player_astar[1].hand)
