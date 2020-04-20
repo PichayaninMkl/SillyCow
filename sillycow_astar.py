@@ -22,6 +22,7 @@ solution_list = {}
 frontier = []
 depth = 0
 max_depth = 0 # For memory measuring
+explored_state = []
 
 draw_src = 0 # 0 = trash, 1 = deck
 draw_history = []
@@ -60,16 +61,22 @@ def play(p:Players):
             update_solution(get_solution(percept), percept['cost'])
             break
 
-        # Hand out, should not appear?
+        # Hand out
         elif (state[1:] == (0, 0, 0, 0)):
             logging('>>> Hand out!')
             update_solution(get_solution(percept), percept['cost'])
+        
+        # Explore duplicates state, skip
+        elif (state in explored_state):
+            continue
 
         # Expand node
         else:
             # Stack new level state
             depth = percept['depth'] + 1
-            max_depth = max(depth, max_depth)        
+            max_depth = max(depth, max_depth)
+            # Add explored state
+            explored_state.append(state)
 
             # Play pair card
             for ctype in p.hand.keys():
@@ -398,7 +405,7 @@ def logging(text:str, end:str = '\n'):
                 
 # -------------------------------------- Control --------------------------------------
 def init_global_var():
-    global log, solution_list, draw_src, max_depth, draw_history, run_history, depth_limit, depth
+    global log, solution_list, draw_src, max_depth, draw_history, run_history, depth_limit, depth, explored_state
                   
     log = None
     solution_list = {}
@@ -408,6 +415,7 @@ def init_global_var():
     run_history = []
     depth = 0
     depth_limit = 10
+    explored_state = []
 
 def astar(p:Players, percept_player:List[Players], percept_deck:List, percept_trash:List,
           percept_farm:str, percept_known_hand:Dict[str,Dict]) -> Tuple[Tuple]:
