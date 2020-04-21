@@ -679,9 +679,10 @@ class MyGame(arcade.Window):
                 USED_DECK.pop()
                 print("Player:", self.player_p, " draw")
                 if self.player_p == 0:
-                    known_hand["R"][self.list_name.index(USED_DECK[-1])] +=1
+                    # print("hadnnn",self.list_name.index(USED_DECK[-1]),USED_DECK[-1])
+                    known_hand["R"][USED_DECK[-1]] +=1
                 elif self.player_p == 2:
-                    known_hand["L"][self.list_name.index(USED_DECK[-1])] +=1
+                    known_hand["L"][USED_DECK[-1]] +=1
 
                 self.prepare_search()
                 # self.command_no += 1
