@@ -37,8 +37,8 @@ DECK = sillycow.create_deck()
 farm = 'SPHC'
 n_player = 3
 ended = 1
-known_hand = {'L':{'S':0, 'P':0, 'H':0, 'C':0}, 'R':{'S':0, 'P':0, 'H':0, 'C':0}}
-
+kh = {'L':{'S':0, 'P':0, 'H':0, 'C':0}, 'R':{'S':0, 'P':0, 'H':0, 'C':0}}
+known_hand = [kh,kh]
 
 player = sillycow.create_player(3, DECK)
 player_temp = None
@@ -171,7 +171,7 @@ def astar_play(player,playnum):
     DECK_astar = DECK.copy()
     trash = USED_DECK.copy()
     print("Astar_hand",player_astar[1].hand)
-    A = astar(player_astar[playnum],player_astar,DECK_astar,trash,farm,known_hand)
+    A = astar(player_astar[playnum],player_astar,DECK_astar,trash,farm,known_hand[playnum-1])
     print(A)
     count = 0
     animal =""
@@ -680,9 +680,12 @@ class MyGame(arcade.Window):
                 print("Player:", self.player_p, " draw")
                 if self.player_p == 0:
                     # print("hadnnn",self.list_name.index(USED_DECK[-1]),USED_DECK[-1])
-                    known_hand["R"][USED_DECK[-1]] +=1
+                    known_hand[0]["R"][USED_DECK[-1]] +=1
+                    known_hand[1]["L"][USED_DECK[-1]] +=1
                 elif self.player_p == 2:
-                    known_hand["L"][USED_DECK[-1]] +=1
+                    known_hand[0]["L"][USED_DECK[-1]] +=1
+                elif self.player_p == 1:
+                    known_hand[1]["R"][USED_DECK[-1]] +=1
 
                 self.prepare_search()
                 # self.command_no += 1
@@ -723,10 +726,10 @@ class MyGame(arcade.Window):
                 self.top_used_card_list.draw()
                 
                 # update know hand when used
-                if self.player_p == 2 & known_hand["L"][card] >=1:
-                    known_hand["L"][card] -=1
-                elif self.player_p == 0 & known_hand["R"][card] >=1 :
-                    known_hand["R"][card] -=1
+                if self.player_p == 2 & known_hand[0]["L"][card] >=1:
+                    known_hand[0]["L"][card] -=1
+                elif self.player_p == 0 & known_hand[0]["R"][card] >=1 :
+                    known_hand[0]["R"][card] -=1
 
                 print("Player:", self.player_p, " used ", card)
                 if self.start_sim == True:
@@ -782,14 +785,22 @@ class MyGame(arcade.Window):
 
 
                 # update known hand
-                if self.player_p == 2 & known_hand["L"][card] >=2:
-                    known_hand["L"][card] -=2
-                elif self.player_p == 0 & known_hand["R"][card] >=2 :
-                    known_hand["R"][card] -=2
-                elif self.player_p == 2 & known_hand["L"][card] >=1 :
-                    known_hand["L"][card] -=1
-                elif self.player_p == 0 & known_hand["R"][card] >=1 :
-                    known_hand["R"][card] -=1
+                if self.player_p == 2 & known_hand[0]["L"][card] >=2:
+                    known_hand[0]["L"][card] -=2
+                elif self.player_p == 0 & known_hand[0]["R"][card] >=2 :
+                    known_hand[0]["R"][card] -=2
+                elif self.player_p == 2 & known_hand[0]["L"][card] >=1 :
+                    known_hand[0]["L"][card] -=1
+                elif self.player_p == 0 & known_hand[0]["R"][card] >=1 :
+                    known_hand[0]["R"][card] -=1
+                elif self.player_p == 1 & known_hand[1]["R"][card] >=2:
+                    known_hand[0]["R"][card] -=2
+                elif self.player_p == 0 & known_hand[1]["L"][card] >=2 :
+                    known_hand[0]["L"][card] -=2
+                elif self.player_p == 1 & known_hand[1]["R"][card] >=1 :
+                    known_hand[0]["R"][card] -=1
+                elif self.player_p == 0 & known_hand[1]["L"][card] >=1 :
+                    known_hand[0]["L"][card] -=1
                 
                 # print("last used card:",USED_DECK[-1])
                 # print("hand card after:",HAND[self.player_p])
@@ -814,14 +825,22 @@ class MyGame(arcade.Window):
                         break
 
                 # update known hand
-                if self.player_p == 2 & known_hand["L"][card] >=2:
-                    known_hand["L"][card] -=2
-                elif self.player_p == 0 & known_hand["R"][card] >=2 :
-                    known_hand["R"][card] -=2
-                elif self.player_p == 2 & known_hand["L"][card] >=1 :
-                    known_hand["L"][card] -=1
-                elif self.player_p == 0 & known_hand["R"][card] >=1 :
-                    known_hand["R"][card] -=1
+                if self.player_p == 2 & known_hand[0]["L"][card] >=2:
+                    known_hand[0]["L"][card] -=2
+                elif self.player_p == 0 & known_hand[0]["R"][card] >=2 :
+                    known_hand[0]["R"][card] -=2
+                elif self.player_p == 2 & known_hand[0]["L"][card] >=1 :
+                    known_hand[0]["L"][card] -=1
+                elif self.player_p == 0 & known_hand[0]["R"][card] >=1 :
+                    known_hand[0]["R"][card] -=1
+                elif self.player_p == 1 & known_hand[1]["R"][card] >=2:
+                    known_hand[0]["R"][card] -=2
+                elif self.player_p == 0 & known_hand[1]["L"][card] >=2 :
+                    known_hand[0]["L"][card] -=2
+                elif self.player_p == 1 & known_hand[1]["R"][card] >=1 :
+                    known_hand[0]["R"][card] -=1
+                elif self.player_p == 0 & known_hand[1]["L"][card] >=1 :
+                    known_hand[0]["L"][card] -=1
 
                 HAND[self.player_p][self.list_name.index(card)] -= amount
                 for i in range(amount):
