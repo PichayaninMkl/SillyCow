@@ -735,7 +735,7 @@ class MyGame(arcade.Window):
                     # check card
                     if card == "H":
                         #right hand
-                        if self.player_p < 0:
+                        if self.player_p > 0:
                             p = self.player_p - 1
                         else:
                             p = 2
