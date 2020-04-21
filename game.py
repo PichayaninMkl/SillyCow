@@ -678,10 +678,10 @@ class MyGame(arcade.Window):
                 self.top_used_card_list.draw()
                 USED_DECK.pop()
                 print("Player:", self.player_p, " draw")
-                if self.player_p == 1:
-                    known_hand["L"][self.list_name.index(USED_DECK[-1])] +=1
-                elif self.player_p == 2:
+                if self.player_p == 0:
                     known_hand["R"][self.list_name.index(USED_DECK[-1])] +=1
+                elif self.player_p == 2:
+                    known_hand["L"][self.list_name.index(USED_DECK[-1])] +=1
 
                 self.prepare_search()
                 # self.command_no += 1
@@ -722,9 +722,9 @@ class MyGame(arcade.Window):
                 self.top_used_card_list.draw()
                 
                 # update know hand when used
-                if self.player_p == 1 & known_hand["L"][card] >=1:
+                if self.player_p == 2 & known_hand["L"][card] >=1:
                     known_hand["L"][card] -=1
-                elif self.player_p == 2 & known_hand["R"][card] >=1 :
+                elif self.player_p == 0 & known_hand["R"][card] >=1 :
                     known_hand["R"][card] -=1
 
                 print("Player:", self.player_p, " used ", card)
@@ -781,13 +781,13 @@ class MyGame(arcade.Window):
 
 
                 # update known hand
-                if self.player_p == 1 & known_hand["L"][card] >=2:
+                if self.player_p == 2 & known_hand["L"][card] >=2:
                     known_hand["L"][card] -=2
-                elif self.player_p == 2 & known_hand["R"][card] >=2 :
+                elif self.player_p == 0 & known_hand["R"][card] >=2 :
                     known_hand["R"][card] -=2
-                elif self.player_p == 1 & known_hand["L"][card] >=1 :
+                elif self.player_p == 2 & known_hand["L"][card] >=1 :
                     known_hand["L"][card] -=1
-                elif self.player_p == 2 & known_hand["R"][card] >=1 :
+                elif self.player_p == 0 & known_hand["R"][card] >=1 :
                     known_hand["R"][card] -=1
                 
                 # print("last used card:",USED_DECK[-1])
@@ -813,13 +813,13 @@ class MyGame(arcade.Window):
                         break
 
                 # update known hand
-                if self.player_p == 1 & known_hand["L"][card] >=2:
+                if self.player_p == 2 & known_hand["L"][card] >=2:
                     known_hand["L"][card] -=2
-                elif self.player_p == 2 & known_hand["R"][card] >=2 :
+                elif self.player_p == 0 & known_hand["R"][card] >=2 :
                     known_hand["R"][card] -=2
-                elif self.player_p == 1 & known_hand["L"][card] >=1 :
+                elif self.player_p == 2 & known_hand["L"][card] >=1 :
                     known_hand["L"][card] -=1
-                elif self.player_p == 2 & known_hand["R"][card] >=1 :
+                elif self.player_p == 0 & known_hand["R"][card] >=1 :
                     known_hand["R"][card] -=1
 
                 HAND[self.player_p][self.list_name.index(card)] -= amount
