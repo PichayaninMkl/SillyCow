@@ -76,14 +76,14 @@ def check_action(action: list, animal: str, old, new,hand_now,player : int):
     elif new == old-1:
         action.append([animal,1,False,False,player])
 
-def dls_play(player):
+def dls_play(player,playnum):
     global farm
     action=[]
     player_dls = deepcopy(player) 
     DECK_dls = DECK.copy()
     trash = USED_DECK.copy()
     # print(player[1].hand)
-    A = dls(player_dls[1], player_dls, DECK_dls, trash, farm)
+    A = dls(player_dls[playnum], player_dls, DECK_dls, trash, farm)
     # print(A)
     count = 0
     animal =""
@@ -109,7 +109,7 @@ def dls_play(player):
                 num = 4
             else:
                 check_hand = i
-            check_action(action,animal,check_hand[num],i[num],i,1)
+            check_action(action,animal,check_hand[num],i[num],i,playnum)
             check_hand = i
         #     print(action)
         #     print("***************************************************")
@@ -120,14 +120,14 @@ def dls_play(player):
 # ******************************************************************************************
 
 # *************************************** Ai action bfs ************************************
-def bfs_play(player):
+def bfs_play(player,playnum):
     global farm
     action=[]
     player_bfs = player.copy()
     DECK_bfs = DECK.copy()
     trash = USED_DECK.copy()
     # print(player[1].hand)
-    A = BFS(player_bfs[2], player_bfs, farm, DECK_bfs, trash)
+    A = BFS(player_bfs[playnum], player_bfs, farm, DECK_bfs, trash)
     # print(A)
     count = 0
     animal =""
@@ -153,7 +153,7 @@ def bfs_play(player):
                 num = 4
             else:
                 check_hand = i
-            check_action(action,animal,check_hand[num],i[num],i,2)
+            check_action(action,animal,check_hand[num],i[num],i,playnum)
             check_hand = i
         #     print(action)
         #     print("***************************************************")
@@ -163,7 +163,7 @@ def bfs_play(player):
 # ******************************************************************************************
 
 # *************************************** Ai action astar ************************************
-def astar_play(player):
+def astar_play(player,playnum):
     global farm 
     # print("Game farm",farm)
     action=[]
@@ -171,7 +171,7 @@ def astar_play(player):
     DECK_astar = DECK.copy()
     trash = USED_DECK.copy()
     print("Astar_hand",player_astar[1].hand)
-    A = astar(player_astar[1],player_astar,DECK_astar,trash,farm,known_hand)
+    A = astar(player_astar[playnum],player_astar,DECK_astar,trash,farm,known_hand)
     print(A)
     count = 0
     animal =""
@@ -197,7 +197,7 @@ def astar_play(player):
                 num = 4
             else:
                 check_hand = i
-            check_action(action,animal,check_hand[num],i[num],i,1)
+            check_action(action,animal,check_hand[num],i[num],i,playnum)
             check_hand = i
         #     print(action)
         #     print("***************************************************")
@@ -612,12 +612,12 @@ class MyGame(arcade.Window):
         
         if self.player_p==0:
             # prepare dls while player 0 is playing
-            action = astar_play(player)
+            action = astar_play(player,1)
 
             # player = player_temp
         elif self.player_p == 1 and self.start_sim!=True:
             # prepare bfs while player 1 (bot) is playing
-            action = bfs_play(player)
+            action = astar_play(player,2)
 
             # print("BFS:",action)
 #   ********************************************************* "PLAYING" ******************************************************** 

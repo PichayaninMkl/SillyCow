@@ -451,7 +451,7 @@ def astar(p:Players, percept_player:List[Players], percept_deck:List, percept_tr
     log_path = 'logging'
     if not os.path.exists(log_path):
         os.mkdir(log_path)
-    log = open(f'{log_path}/dls-{ts}.txt', 'w', encoding='utf-8')
+    log = open(f'{log_path}/astar-{ts}.txt', 'w', encoding='utf-8')
     
     play(p) # A* iteration
 
