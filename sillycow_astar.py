@@ -27,22 +27,23 @@ explored_state = []
 draw_src = 0 # 0 = trash, 1 = deck
 draw_history = []
 run_history = []
-
+# backTrack_limit = 3
 # -------------------------------------- Core --------------------------------------
 def play(p:Players):
     global depth
     global draw_src
     global max_depth
     global trash
+    global frontier
 
     # Stack root state
     heu_cost = heuristic_cost(p)
     stack_percept(p, None, 0, heu_cost) # No parent percept, actual cost = 0
-
     while frontier: # Loop until pop all stack's elements
 
         # Get expanding state & percept
         percept = select_frontier()
+        # frontier = []
         p = set_percept(p, percept)
         state = percept['state']
 
@@ -64,7 +65,10 @@ def play(p:Players):
         # Hand out
         elif (state[1:] == (0, 0, 0, 0)):
             logging('>>> Hand out!')
-            update_solution(get_solution(percept), percept['cost'])
+            # update_solution(get_solution(percept), percept['cost'])
+            # break
+            continue
+
         
         # Explore duplicates state, skip
         elif (state in explored_state):

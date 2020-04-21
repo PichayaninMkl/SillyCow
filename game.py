@@ -77,6 +77,7 @@ def check_action(action: list, animal: str, old, new,hand_now,player : int):
         action.append([animal,1,False,False,player])
 
 def dls_play(player):
+    global farm
     action=[]
     player_dls = deepcopy(player) 
     DECK_dls = DECK.copy()
@@ -120,6 +121,7 @@ def dls_play(player):
 
 # *************************************** Ai action bfs ************************************
 def bfs_play(player):
+    global farm
     action=[]
     player_bfs = player.copy()
     DECK_bfs = DECK.copy()
@@ -162,6 +164,8 @@ def bfs_play(player):
 
 # *************************************** Ai action astar ************************************
 def astar_play(player):
+    global farm 
+    # print("Game farm",farm)
     action=[]
     player_astar = player.copy()
     DECK_astar = DECK.copy()
@@ -759,8 +763,10 @@ class MyGame(arcade.Window):
                 self.animal_all_dict[card].update()
                 self.animal_position_dict[card] = 1
                 if self.start_sim!=True:
+                    farm = farm.replace(card,"")
+                    print("after move",card,farm)
                     player[self.player_p].left.field +=  card  # update player field percept
-                    farm.replace(card,'')
+                    self.prepare_search()
 
                 HAND[self.player_p][self.list_name.index(card)] -= amount
                 for i in range(amount):
@@ -789,7 +795,6 @@ class MyGame(arcade.Window):
                 print("After moving card. Percept of player: 0 is",player[0].field)
                 print("After moving card. Percept of player: 1 is",player[1].field)
                 print("After moving card. Percept of player: 2 is",player[2].field)
-                self.prepare_search()
                 print("Player:", self.player_p, " move ", card)
                 # self.command_no += 1
             elif amount == 2 and self.animal_position_dict[card] == 1:
