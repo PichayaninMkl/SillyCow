@@ -612,7 +612,7 @@ class MyGame(arcade.Window):
         
         if self.player_p==0:
             # prepare dls while player 0 is playing
-            action = bfs_play(player,1)
+            action = dls_play(player,1)
 
             # player = player_temp
         elif self.player_p == 1 and self.start_sim!=True:
