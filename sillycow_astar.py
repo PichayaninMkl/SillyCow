@@ -20,30 +20,27 @@ known_hand = None
 # State & Memorized variable
 solution_list = {}
 frontier = []
-depth = 0
-max_depth = 0 # For memory measuring
+max_queue = 0 # For memory measuring
 explored_state = []
 
 draw_src = 0 # 0 = trash, 1 = deck
 draw_history = []
 run_history = []
-# backTrack_limit = 3
+
 # -------------------------------------- Core --------------------------------------
 def play(p:Players):
-    global depth
     global draw_src
-    global max_depth
+    global max_queue
     global trash
-    global frontier
 
     # Stack root state
     heu_cost = heuristic_cost(p)
-    stack_percept(p, None, 0, heu_cost) # No parent percept, actual cost = 0
+    add_frontier(p, None, 0, heu_cost) # No parent percept, actual cost = 0
+
     while frontier: # Loop until pop all stack's elements
 
         # Get expanding state & percept
         percept = select_frontier()
-        # frontier = []
         p = set_percept(p, percept)
         state = percept['state']
 
@@ -54,7 +51,7 @@ def play(p:Players):
         else:
             logging(f"\n<<< Expand <{state}> cost ({percept['cost']}) as Root >>>")
         logging(f'animal location :\n\tFarm = [{farm}]\n\tp[0] = [{player[0].field}]\n\tp[1] = [{player[1].field}]\n\tp[2] = [{player[2].field}]')
-
+        
 
         # Found goal
         if (state == ('', 0, 0, 0, 0)):
@@ -65,20 +62,15 @@ def play(p:Players):
         # Hand out
         elif (state[1:] == (0, 0, 0, 0)):
             logging('>>> Hand out!')
-            # update_solution(get_solution(percept), percept['cost'])
-            # break
             continue
-
         
-        # Explore duplicates state, skip
+        # Explore duplicated state, skip
         elif (state in explored_state):
+            logging('>>> Duplicated state!')
             continue
 
         # Expand node
         else:
-            # Stack new level state
-            depth = percept['depth'] + 1
-            max_depth = max(depth, max_depth)
             # Add explored state
             explored_state.append(state)
 
@@ -88,7 +80,7 @@ def play(p:Players):
                     act_cost = actual_cost(p, ctype, 'd2', percept['act_cost'])
                     animal_run(ctype, p, 'f')
                     heu_cost = heuristic_cost(p)
-                    stack_percept(p, percept, act_cost, heu_cost)
+                    add_frontier(p, percept, act_cost, heu_cost)
                     animal_run(ctype, p, 'r')
 
             # Play single card
@@ -97,7 +89,7 @@ def play(p:Players):
                     act_cost = actual_cost(p, ctype, 'd1', percept['act_cost'])
                     card_operation(ctype, p, 'f')
                     heu_cost = heuristic_cost(p)
-                    stack_percept(p, percept, act_cost, heu_cost)
+                    add_frontier(p, percept, act_cost, heu_cost)
                     card_operation(ctype, p, 'r')
             
             # Play draw trash
@@ -105,7 +97,7 @@ def play(p:Players):
                 act_cost = actual_cost(p, trash[-1], 'dt', percept['act_cost'])
                 draw_trash(p, 'f')
                 heu_cost = heuristic_cost(p)
-                stack_percept(p, percept, act_cost, heu_cost)
+                add_frontier(p, percept, act_cost, heu_cost)
                 draw_trash(p, 'r')
 
             # Play draw deck
@@ -115,20 +107,20 @@ def play(p:Players):
                     act_cost = actual_cost(p, ctype, 'dd', percept['act_cost'])
                     draw_deck(p, ctype, 'f') # simulative draw
                     heu_cost = heuristic_cost(p)
-                    stack_percept(p, percept, act_cost, heu_cost)
+                    add_frontier(p, percept, act_cost, heu_cost)
                     draw_deck(p, ctype, 'r')
                 draw_src = 0
 
 
 # -------------------------------------- Frontier & Percept & State --------------------------------------
-def stack_percept(p:Players, parent_percept:Dict, act_cost:float, heu_cost:int):
+def add_frontier(p:Players, parent_percept:Dict, act_cost:float, heu_cost:int):
     global frontier
-    global depth
     global draw_src
     global player
     global deck
     global trash
     global farm
+    global max_queue
     
     state = (p.field, p.hand['S'], p.hand['P'], p.hand['H'], p.hand['C'])
     percept = {# Game percept
@@ -142,10 +134,10 @@ def stack_percept(p:Players, parent_percept:Dict, act_cost:float, heu_cost:int):
               'act_cost':act_cost,
               'heu_cost':heu_cost,
               'cost':act_cost+heu_cost,
-              'parent':parent_percept,
-              'depth':depth}
+              'parent':parent_percept}
 
     frontier.append(percept)
+    max_queue = max(len(frontier), max_queue)
     logging(f'=> Push <{state}> to Frontier with cost ({act_cost} + {heu_cost} = {act_cost+heu_cost})')
 
 def set_percept(p, percept:Dict) -> Players:
@@ -409,18 +401,17 @@ def logging(text:str, end:str = '\n'):
                 
 # -------------------------------------- Control --------------------------------------
 def init_global_var():
-    global log, solution_list, draw_src, max_depth, draw_history, run_history, depth_limit, depth, explored_state, frontier
+    global log, solution_list, frontier, draw_src, max_queue, draw_history, run_history, explored_state
                   
     log = None
     solution_list = {}
+    frontier = []
     draw_src = 0
-    max_depth = 0
+    max_queue = 0
     draw_history = []
     run_history = []
-    depth = 0
-    depth_limit = 10
     explored_state = []
-    frontier = []
+
 
 def astar(p:Players, percept_player:List[Players], percept_deck:List, percept_trash:List,
           percept_farm:str, percept_known_hand:Dict[str,Dict]) -> Tuple[Tuple]:
@@ -439,10 +430,6 @@ def astar(p:Players, percept_player:List[Players], percept_deck:List, percept_tr
     farm = percept_farm
     known_hand = percept_known_hand
     
-    print("Know:",known_hand)
-    print("hand:",p.hand)
-    print("farm:",percept_farm)
-    print("field:",p.field)
     # Time measuring
     start = datetime.now()
     ts = str(start)[:-7].replace(':', '-').replace(' ', '_')
@@ -451,7 +438,7 @@ def astar(p:Players, percept_player:List[Players], percept_deck:List, percept_tr
     log_path = 'logging'
     if not os.path.exists(log_path):
         os.mkdir(log_path)
-    log = open(f'{log_path}/astar-{ts}.txt', 'w', encoding='utf-8')
+    log = open(f'{log_path}/ass-{ts}.txt', 'w', encoding='utf-8')
     
     play(p) # A* iteration
 
@@ -470,7 +457,6 @@ def astar(p:Players, percept_player:List[Players], percept_deck:List, percept_tr
         sol = tuple(solution_list.items())[0][0]
 
     logging(f'\nSelect solution {sol}')
-    logging(f'\nElapsed time = {elapsed} seconds\nMax Depth = {max_depth+1} levels (0 - {max_depth})') # Depth include root
+    logging(f'\nElapsed time = {elapsed} seconds\nMax Queue = {max_queue} nodes')
     log.close()
-    print("Solution!", sol)
     return sol

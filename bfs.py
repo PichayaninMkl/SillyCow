@@ -1,9 +1,6 @@
 from writelog import write_log, close_log
 import time
 
-# import psutil
-# import math
-
 trash_top = -1
 deck_top = -1
 
@@ -73,8 +70,11 @@ def searching(player_root, field_root):
 
     count = 0
     count_dup = 0
+    count_max_queue = 0
 
     while len(frontier) > 0:
+        if count_max_queue < len(frontier):
+            count_max_queue = len(frontier)
         count += 1
 
         this_node = frontier.pop(0)
@@ -82,9 +82,6 @@ def searching(player_root, field_root):
 
         explored.append(this_node)
         write_log("Exploring >> Node : " + str(this_node["ref_num"]))
-        # write_log("Depth : " + str(this_node["depth"]))
-        # write_log(str(this_node["player"]))
-        # write_log(str(this_node["field"]))
 
         player = this_node["player"]
         field = this_node["field"]
@@ -103,7 +100,8 @@ def searching(player_root, field_root):
                 path.append(prev_node)
             path.reverse()
             write_log("\t>> Goal state")
-            return [path, len(explored)]
+            write_log("\t\t>> Max Queue :" + str(count_max_queue))
+            return [path, count_max_queue]
         if player.hand_sheep + player.hand_pig + player.hand_horse + player.hand_cow == 0:
             write_log("\t>> Hand out")
             continue
@@ -354,50 +352,31 @@ def searching(player_root, field_root):
                         count_dup += 1
                 if not is_duplicate:
                     frontier.append(next_node)
-                # is_duplicate = False
-                # for n in explored + frontier:
-                #     next_left = next_node["field"].left
-                #     next_right = next_node["field"].right
-                #     left = n["field"].left
-                #     right = n["field"].right
-                #     if next_node["player"] == n["player"] and next_left == left and next_right == right:
-                #         is_duplicate = True
-                #         # write_log("\t^^^ Duplicate Node")
-                #         print("\t>> Duplicate node")
-                #         count_dup += 1
-                # if not is_duplicate:
-                #     frontier.append(next_node)
     return solution
 
 
-# def BFS(player,player_list, farm, deck, trash):
 def BFS(player, player_list, farm, deck, trash):
     print("Percept from BFS(player 2)","Field",player.field,"Hand:",player.hand)
 
     start_time = time.time()
-    # psutil.cpu_percent()
-    # psutil.virtual_memory()
-    # mem = dict(psutil.virtual_memory()._asdict())
 
     left_field = player.left.field
     right_field = player.right.field
 
-    # root_node = Node(field, hand['S'], hand['P'], hand['H'], hand['C'])
     root_node = Node(player.field, player.hand['S'], player.hand['P'], player.hand['H'], player.hand['C'])
     root_field = Field(left_field, right_field, farm, deck, trash)
 
     out = searching(root_node, root_field)
     path = out.copy()[0]
-    n_node = out.copy()[1]
+    max_stack = out.copy()[1]
 
     runtime = time.time() - start_time
     write_log("")
     write_log(get_str_action_path(path))
     print("Run-time : " + str('%.4f' % runtime) + " seconds")
-    print("Node(s) : " + str(n_node))
+    # print("Node(s) : " + str(n_node))
     write_log("Run-time : " + str('%.4f' % runtime) + " seconds")
-    write_log("Node(s) : " + str(n_node))
-    # logging("Space usage : " + str(math.ceil(mem['used'] / (1024 ** 2))) + " Mb")
+    write_log("Node(s) : " + str(max_stack))
 
     solution = []
     for n in path:
